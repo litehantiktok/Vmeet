@@ -5,296 +5,528 @@ const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// Lưu thông tin các phòng
 const rooms = new Map();
 
-/*
-room:
-{
-  host: socket.id,
-  users: Map()
-}
-*/
+
+// ================================
+// KẾT NỐI
+// ================================
 
 io.on("connection", (socket) => {
 
-  // =========================
+  console.log("Connected:", socket.id);
+
+
+  // ==============================
   // TẠO PHÒNG
-  // =========================
+  // ==============================
 
   socket.on("create-room", ({ room, name }) => {
 
     if (rooms.has(room)) {
+
       socket.emit("room-error", {
-        message: "Phòng này đã tồn tại."
+        message: "Phòng đã tồn tại."
       });
+
       return;
     }
+
 
     rooms.set(room, {
+
       host: socket.id,
+
       users: new Map()
+
     });
 
+
     socket.data.room = room;
-    socket.data.name = name || "Chủ phòng";
+
+    socket.data.name =
+      name || "Chủ phòng";
+
     socket.data.isHost = true;
 
-    rooms.get(room).users.set(socket.id, {
-      id: socket.id,
-      name: socket.data.name,
-      approved: true
-    });
 
-    socket.join(room);
-
-    socket.emit("room-created", {
-      room,
-      isHost: true
-    });
-
-  });
-
-
-  // =========================
-  // XIN VÀO PHÒNG
-  // =========================
-
-  socket.on("request-join", ({ room, name }) => {
-
-    const currentRoom = rooms.get(room);
-
-    if (!currentRoom) {
-
-      socket.emit("room-error", {
-        message: "Không tìm thấy phòng."
-      });
-
-      return;
-    }
-
-    socket.data.room = room;
-    socket.data.name = name || "Khách";
-    socket.data.isHost = false;
-
-    currentRoom.users.set(socket.id, {
-      id: socket.id,
-      name: socket.data.name,
-      approved: false
-    });
-
-    // Thông báo cho chủ phòng
-    io.to(currentRoom.host).emit(
-      "join-request",
+    rooms.get(room).users.set(
+      socket.id,
       {
+
         id: socket.id,
-        name: socket.data.name
+
+        name: socket.data.name,
+
+        approved: true
+
       }
     );
 
-    // Thông báo cho người đang xin vào
-    socket.emit("waiting-approval");
 
-  });
+    socket.join(room);
 
 
-  // =========================
-  // CHỦ PHÒNG DUYỆT
-  // =========================
+    socket.emit("room-created", {
 
-  socket.on("approve-user", ({ userId }) => {
+      room,
 
-    const room = rooms.get(
-      socket.data.room
-    );
+      isHost: true
 
-    if (!room) return;
-
-    if (room.host !== socket.id) return;
-
-    const user = room.users.get(userId);
-
-    if (!user) return;
-
-    user.approved = true;
-
-    const target =
-      io.sockets.sockets.get(userId);
-
-    if (!target) return;
-
-    target.join(socket.data.room);
-
-    target.emit("approved", {
-      room: socket.data.room
     });
 
-    // Gửi danh sách người đang được phép vào
-    const approvedUsers =
-      [...room.users.values()]
-        .filter(user => user.approved);
 
-    io.to(socket.data.room).emit(
-      "participants",
-      approvedUsers
+    console.log(
+      "Room created:",
+      room
     );
 
   });
 
 
-  // =========================
-  // CHỦ PHÒNG TỪ CHỐI
-  // =========================
+  // ==============================
+  // XIN VÀO PHÒNG
+  // ==============================
 
-  socket.on("reject-user", ({ userId }) => {
+  socket.on(
+    "request-join",
+    ({ room, name }) => {
 
-    const room = rooms.get(
-      socket.data.room
-    );
+      const currentRoom =
+        rooms.get(room);
 
-    if (!room) return;
 
-    if (room.host !== socket.id) return;
+      if (!currentRoom) {
 
-    const target =
-      io.sockets.sockets.get(userId);
+        socket.emit(
+          "room-error",
+          {
+            message:
+              "Không tìm thấy phòng."
+          }
+        );
 
-    if (target) {
+        return;
+      }
 
-      target.emit("rejected", {
-        message:
-          "Chủ phòng đã từ chối yêu cầu tham gia."
-      });
 
-      target.data.room = null;
+      socket.data.room =
+        room;
+
+      socket.data.name =
+        name || "Khách";
+
+      socket.data.isHost =
+        false;
+
+
+      currentRoom.users.set(
+        socket.id,
+        {
+
+          id: socket.id,
+
+          name: socket.data.name,
+
+          approved: false
+
+        }
+      );
+
+
+      // Thông báo cho chủ phòng
+      io.to(
+        currentRoom.host
+      ).emit(
+        "join-request",
+        {
+
+          id: socket.id,
+
+          name: socket.data.name
+
+        }
+      );
+
+
+      // Người xin vào chờ
+      socket.emit(
+        "waiting-approval"
+      );
+
     }
-
-    room.users.delete(userId);
-
-  });
+  );
 
 
-  // =========================
-  // KẾT NỐI WEBRTC
-  // =========================
+  // ==============================
+  // DUYỆT NGƯỜI
+  // ==============================
 
-  socket.on("signal", ({ to, data }) => {
+  socket.on(
+    "approve-user",
+    ({ userId }) => {
 
-    io.to(to).emit("signal", {
-      from: socket.id,
-      data
-    });
-
-  });
+      const room =
+        rooms.get(
+          socket.data.room
+        );
 
 
-  // =========================
+      if (!room) return;
+
+
+      // Chỉ chủ phòng được duyệt
+      if (
+        room.host !==
+        socket.id
+      ) {
+        return;
+      }
+
+
+      const user =
+        room.users.get(userId);
+
+
+      if (!user) return;
+
+
+      user.approved = true;
+
+
+      const target =
+        io.sockets.sockets.get(
+          userId
+        );
+
+
+      if (!target) return;
+
+
+      // Cho người đó vào Socket.IO room
+      target.join(
+        socket.data.room
+      );
+
+
+      target.emit(
+        "approved",
+        {
+          room:
+            socket.data.room
+        }
+      );
+
+
+      // Gửi danh sách người đã được duyệt
+      const approvedUsers =
+        [...room.users.values()]
+          .filter(
+            user =>
+              user.approved
+          );
+
+
+      io.to(
+        socket.data.room
+      ).emit(
+        "participants",
+        approvedUsers
+      );
+
+
+      // Thông báo người mới đã vào
+      io.to(
+        socket.data.room
+      ).emit(
+        "user-joined",
+        {
+
+          id: user.id,
+
+          name: user.name
+
+        }
+      );
+
+    }
+  );
+
+
+  // ==============================
+  // TỪ CHỐI
+  // ==============================
+
+  socket.on(
+    "reject-user",
+    ({ userId }) => {
+
+      const room =
+        rooms.get(
+          socket.data.room
+        );
+
+
+      if (!room) return;
+
+
+      if (
+        room.host !==
+        socket.id
+      ) {
+        return;
+      }
+
+
+      const target =
+        io.sockets.sockets.get(
+          userId
+        );
+
+
+      if (target) {
+
+        target.emit(
+          "rejected",
+          {
+
+            message:
+              "Chủ phòng đã từ chối yêu cầu tham gia."
+
+          }
+        );
+
+        target.data.room =
+          null;
+
+      }
+
+
+      room.users.delete(
+        userId
+      );
+
+    }
+  );
+
+
+  // ==============================
+  // WEBRTC SIGNAL
+  // ==============================
+
+  socket.on(
+    "signal",
+    ({ to, data }) => {
+
+      const room =
+        rooms.get(
+          socket.data.room
+        );
+
+
+      if (!room) return;
+
+
+      const targetUser =
+        room.users.get(to);
+
+
+      if (
+        !targetUser ||
+        !targetUser.approved
+      ) {
+        return;
+      }
+
+
+      io.to(to).emit(
+        "signal",
+        {
+
+          from:
+            socket.id,
+
+          data
+
+        }
+      );
+
+    }
+  );
+
+
+  // ==============================
   // CHAT
-  // =========================
+  // ==============================
 
-  socket.on("chat", ({ room, name, text }) => {
+  socket.on(
+    "chat",
+    ({ room, name, text }) => {
 
-    if (!text || !text.trim()) return;
-
-    const currentRoom =
-      rooms.get(room);
-
-    if (!currentRoom) return;
-
-    const user =
-      currentRoom.users.get(socket.id);
-
-    if (!user || !user.approved) return;
-
-    io.to(room).emit("chat", {
-      name: name || "Khách",
-      text: text.trim()
-    });
-
-  });
+      if (
+        !text ||
+        !text.trim()
+      ) {
+        return;
+      }
 
 
-  // =========================
-  // LẤY DANH SÁCH NGƯỜI
-  // =========================
-
-  socket.on("get-participants", () => {
-
-    const room =
-      rooms.get(socket.data.room);
-
-    if (!room) return;
-
-    const users =
-      [...room.users.values()]
-        .filter(user => user.approved);
-
-    socket.emit(
-      "participants",
-      users
-    );
-
-  });
+      const currentRoom =
+        rooms.get(room);
 
 
-  // =========================
-  // NGƯỜI RỜI PHÒNG
-  // =========================
-
-  socket.on("leave-room", () => {
-
-    removeUser(socket);
-
-  });
+      if (!currentRoom) {
+        return;
+      }
 
 
-  // =========================
-  // NGẮT KẾT NỐI
-  // =========================
+      const user =
+        currentRoom.users.get(
+          socket.id
+        );
 
-  socket.on("disconnect", () => {
 
-    removeUser(socket);
+      if (
+        !user ||
+        !user.approved
+      ) {
+        return;
+      }
 
-  });
+
+      io.to(room).emit(
+        "chat",
+        {
+
+          name:
+            name ||
+            user.name,
+
+          text:
+            text.trim()
+
+        }
+      );
+
+    }
+  );
+
+
+  // ==============================
+  // DANH SÁCH NGƯỜI
+  // ==============================
+
+  socket.on(
+    "get-participants",
+    () => {
+
+      const room =
+        rooms.get(
+          socket.data.room
+        );
+
+
+      if (!room) return;
+
+
+      const users =
+        [...room.users.values()]
+          .filter(
+            user =>
+              user.approved
+          );
+
+
+      socket.emit(
+        "participants",
+        users
+      );
+
+    }
+  );
+
+
+  // ==============================
+  // RỜI PHÒNG
+  // ==============================
+
+  socket.on(
+    "leave-room",
+    () => {
+
+      removeUser(socket);
+
+    }
+  );
+
+
+  // ==============================
+  // DISCONNECT
+  // ==============================
+
+  socket.on(
+    "disconnect",
+    () => {
+
+      removeUser(socket);
+
+    }
+  );
 
 });
 
 
-// =========================
-// XÓA NGƯỜI
-// =========================
+// =================================
+// XỬ LÝ NGƯỜI RỜI
+// =================================
 
 function removeUser(socket) {
 
   const roomId =
     socket.data.room;
 
-  if (!roomId) return;
+
+  if (!roomId) {
+    return;
+  }
+
 
   const room =
     rooms.get(roomId);
 
-  if (!room) return;
+
+  if (!room) {
+    return;
+  }
 
 
-  // Nếu chủ phòng rời
-  if (room.host === socket.id) {
+  // Chủ phòng rời
+  if (
+    room.host ===
+    socket.id
+  ) {
 
     io.to(roomId).emit(
       "room-closed"
     );
 
-    rooms.delete(roomId);
+
+    rooms.delete(
+      roomId
+    );
+
 
     return;
+
   }
 
 
+  // Người tham gia rời
   room.users.delete(
     socket.id
   );
@@ -303,14 +535,20 @@ function removeUser(socket) {
   socket.to(roomId).emit(
     "user-left",
     {
-      id: socket.id
+
+      id:
+        socket.id
+
     }
   );
 
 
   const users =
     [...room.users.values()]
-      .filter(user => user.approved);
+      .filter(
+        user =>
+          user.approved
+      );
 
 
   io.to(roomId).emit(
@@ -321,12 +559,14 @@ function removeUser(socket) {
 }
 
 
-// =========================
-// PORT
-// =========================
+// =================================
+// SERVER PORT
+// =================================
 
 const PORT =
-  process.env.PORT || 3000;
+  process.env.PORT ||
+  3000;
+
 
 server.listen(
   PORT,
