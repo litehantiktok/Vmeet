@@ -5,31 +5,99 @@ const $ = (id) => document.getElementById(id);
 let name = "";
 let room = "";
 let stream = null;
+let isHost = false;
 let currentFacingMode = "user";
 
 const peers = new Map();
 
 
 // =========================
-// TẠO / THAM GIA PHÒNG
+// TIỆN ÍCH
 // =========================
 
-function openMeeting(roomId) {
+function show(element) {
+  element.classList.remove("hidden");
+}
 
-  room = roomId;
+function hide(element) {
+  element.classList.add("hidden");
+}
+
+function toast(message) {
+  const el = $("toast");
+
+  if (!el) return;
+
+  el.textContent = message;
+  show(el);
+
+  setTimeout(() => {
+    hide(el);
+  }, 2500);
+}
+
+
+// =========================
+// TẠO PHÒNG
+// =========================
+
+$("create").onclick = async () => {
+
+  name =
+    $("name").value.trim() ||
+    "Chủ phòng";
+
+  room =
+    Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
+
+  isHost = true;
+
+  socket.emit("create-room", {
+    room,
+    name
+  });
+
+};
+
+
+// =========================
+// THAM GIA PHÒNG
+// =========================
+
+$("join").onclick = () => {
 
   name =
     $("name").value.trim() ||
     "Khách";
 
-  $("home").classList.add("hidden");
-  $("meeting").classList.remove("hidden");
+  const roomId =
+    $("room").value.trim();
 
-  $("roomTitle").textContent =
-    "Phòng: " + room;
+  if (!roomId) {
+    alert("Hãy nhập mã phòng.");
+    return;
+  }
 
-  $("localName").textContent =
-    name;
+  room = roomId.toUpperCase();
+
+  isHost = false;
+
+  socket.emit("request-join", {
+    room,
+    name
+  });
+
+};
+
+
+// =========================
+// PHÒNG ĐƯỢC TẠO
+// =========================
+
+socket.on("room-created", async () => {
 
   history.replaceState(
     {},
@@ -38,46 +106,81 @@ function openMeeting(roomId) {
       encodeURIComponent(room)
   );
 
-  startMeeting();
-}
+  await enterMeeting();
+
+});
 
 
-// Tạo phòng mới
-$("create").onclick = () => {
+// =========================
+// ĐANG CHỜ DUYỆT
+// =========================
 
-  const newRoom =
-    Math.random()
-      .toString(36)
-      .substring(2, 8)
-      .toUpperCase();
+socket.on("waiting-approval", () => {
 
-  openMeeting(newRoom);
-};
+  hide($("home"));
+  show($("waiting"));
+
+});
 
 
-// Tham gia phòng
-$("join").onclick = () => {
+// =========================
+// ĐƯỢC CHỦ PHÒNG DUYỆT
+// =========================
 
-  const roomId =
-    $("room").value.trim();
+socket.on("approved", async () => {
 
-  if (roomId) {
-    openMeeting(roomId);
+  hide($("waiting"));
+
+  await enterMeeting();
+
+  toast("Bạn đã được duyệt vào phòng.");
+
+});
+
+
+// =========================
+// BỊ TỪ CHỐI
+// =========================
+
+socket.on("rejected", ({ message }) => {
+
+  alert(
+    message ||
+    "Yêu cầu tham gia đã bị từ chối."
+  );
+
+  location.href =
+    location.pathname;
+
+});
+
+
+// =========================
+// VÀO PHÒNG
+// =========================
+
+async function enterMeeting() {
+
+  hide($("home"));
+  hide($("waiting"));
+  show($("meeting"));
+
+  $("roomTitle").textContent =
+    "Phòng: " + room;
+
+  $("localName").textContent =
+    name;
+
+  if (isHost) {
+
+    $("participantsBtn").style.display =
+      "inline-block";
+
   }
 
-};
+  await startCamera();
 
-
-// Nếu link có sẵn mã phòng
-const urlRoom =
-  new URLSearchParams(
-    location.search
-  ).get("room");
-
-if (urlRoom) {
-
-  $("room").value =
-    urlRoom;
+  socket.emit("get-participants");
 
 }
 
@@ -86,7 +189,7 @@ if (urlRoom) {
 // CAMERA + MICRO
 // =========================
 
-async function startMeeting() {
+async function startCamera() {
 
   try {
 
@@ -106,14 +209,6 @@ async function startMeeting() {
     $("localVideo").srcObject =
       stream;
 
-    socket.emit(
-      "join-room",
-      {
-        room,
-        name
-      }
-    );
-
   }
 
   catch (error) {
@@ -121,7 +216,7 @@ async function startMeeting() {
     console.error(error);
 
     alert(
-      "Không thể truy cập camera hoặc micro. Hãy cho phép Safari sử dụng camera và micro."
+      "Không thể truy cập camera hoặc micro. Hãy cấp quyền cho Safari."
     );
 
   }
@@ -130,13 +225,10 @@ async function startMeeting() {
 
 
 // =========================
-// TẠO KẾT NỐI VỚI NGƯỜI KHÁC
+// WEBRTC PEER
 // =========================
 
-function addPeer(
-  id,
-  peerName
-) {
+function addPeer(id, peerName) {
 
   if (peers.has(id)) {
     return peers.get(id);
@@ -146,23 +238,20 @@ function addPeer(
     new RTCPeerConnection({
 
       iceServers: [
-
         {
           urls:
             "stun:stun.l.google.com:19302"
         }
-
       ]
 
     });
 
 
-  // Gửi camera + mic của mình
   if (stream) {
 
     stream
       .getTracks()
-      .forEach((track) => {
+      .forEach(track => {
 
         pc.addTrack(
           track,
@@ -174,11 +263,8 @@ function addPeer(
   }
 
 
-  // Tạo ô video
   const tile =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   tile.className =
     "video-tile";
@@ -188,18 +274,14 @@ function addPeer(
 
 
   const video =
-    document.createElement(
-      "video"
-    );
+    document.createElement("video");
 
   video.autoplay = true;
   video.playsInline = true;
 
 
   const label =
-    document.createElement(
-      "span"
-    );
+    document.createElement("span");
 
   label.textContent =
     peerName;
@@ -208,12 +290,10 @@ function addPeer(
   tile.appendChild(video);
   tile.appendChild(label);
 
-  $("videos")
-    .appendChild(tile);
+  $("videos").appendChild(tile);
 
 
-  // Nhận video người khác
-  pc.ontrack = (event) => {
+  pc.ontrack = event => {
 
     video.srcObject =
       event.streams[0];
@@ -221,27 +301,21 @@ function addPeer(
   };
 
 
-  // ICE candidate
   pc.onicecandidate =
-    (event) => {
+    event => {
 
-      if (
-        event.candidate
-      ) {
+      if (event.candidate) {
 
-        socket.emit(
-          "signal",
-          {
+        socket.emit("signal", {
 
-            to: id,
+          to: id,
 
-            data: {
-              candidate:
-                event.candidate
-            }
-
+          data: {
+            candidate:
+              event.candidate
           }
-        );
+
+        });
 
       }
 
@@ -259,16 +333,163 @@ function addPeer(
 
 
 // =========================
-// NGƯỜI ĐÃ CÓ TRONG PHÒNG
+// DANH SÁCH NGƯỜI THAM GIA
+// =========================
+
+socket.on(
+  "participants",
+  users => {
+
+    renderParticipants(users);
+
+  }
+);
+
+
+function renderParticipants(users) {
+
+  const list =
+    $("participantsList");
+
+  list.innerHTML = "";
+
+
+  users.forEach(user => {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "participant";
+
+
+    const nameEl =
+      document.createElement("span");
+
+    nameEl.textContent =
+      user.name +
+      (user.id === socket.id
+        ? " (Bạn)"
+        : "");
+
+
+    item.appendChild(nameEl);
+
+    list.appendChild(item);
+
+  });
+
+}
+
+
+// =========================
+// YÊU CẦU THAM GIA
+// =========================
+
+socket.on(
+  "join-request",
+  ({ id, name }) => {
+
+    if (!isHost) return;
+
+
+    const list =
+      $("requestsList");
+
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "request";
+
+
+    const nameEl =
+      document.createElement("span");
+
+    nameEl.textContent =
+      name;
+
+
+    const approve =
+      document.createElement("button");
+
+    approve.textContent =
+      "✓ Duyệt";
+
+
+    approve.onclick =
+      () => {
+
+        socket.emit(
+          "approve-user",
+          {
+            userId: id
+          }
+        );
+
+        item.remove();
+
+      };
+
+
+    const reject =
+      document.createElement("button");
+
+    reject.textContent =
+      "✕ Từ chối";
+
+
+    reject.onclick =
+      () => {
+
+        socket.emit(
+          "reject-user",
+          {
+            userId: id
+          }
+        );
+
+        item.remove();
+
+      };
+
+
+    item.appendChild(nameEl);
+    item.appendChild(approve);
+    item.appendChild(reject);
+
+
+    list.appendChild(item);
+
+
+    toast(
+      name +
+      " đang xin vào phòng."
+    );
+
+  }
+);
+
+
+// =========================
+// WEBRTC: NGƯỜI ĐÃ CÓ
 // =========================
 
 socket.on(
   "existing-users",
-  async (users) => {
+  async users => {
 
     for (
       const user of users
     ) {
+
+      if (
+        user.id === socket.id
+      ) {
+        continue;
+      }
+
 
       const pc =
         addPeer(
@@ -306,10 +527,13 @@ socket.on(
 );
 
 
-// Người mới vào
+// =========================
+// NGƯỜI MỚI
+// =========================
+
 socket.on(
   "user-joined",
-  (user) => {
+  user => {
 
     addPeer(
       user.id,
@@ -321,7 +545,7 @@ socket.on(
 
 
 // =========================
-// XỬ LÝ VIDEO CALL
+// WEBRTC SIGNAL
 // =========================
 
 socket.on(
@@ -346,7 +570,6 @@ socket.on(
     }
 
 
-    // SDP
     if (data.sdp) {
 
       await pc.setRemoteDescription(
@@ -354,7 +577,6 @@ socket.on(
       );
 
 
-      // Nhận offer
       if (
         data.sdp.type ===
         "offer"
@@ -388,10 +610,7 @@ socket.on(
     }
 
 
-    // ICE
-    else if (
-      data.candidate
-    ) {
+    if (data.candidate) {
 
       try {
 
@@ -414,7 +633,7 @@ socket.on(
 
 
 // =========================
-// NGƯỜI RỜI PHÒNG
+// NGƯỜI RỜI
 // =========================
 
 socket.on(
@@ -443,7 +662,7 @@ socket.on(
 
 
 // =========================
-// BẬT / TẮT MICRO
+// MICRO
 // =========================
 
 $("mic").onclick = () => {
@@ -467,29 +686,15 @@ $("mic").onclick = () => {
 
 
 // =========================
-// BẬT / TẮT CAMERA
+// CAMERA
 // =========================
 
-$("cam").onclick = async () => {
-
-  if (!stream) {
-    return;
-  }
-
+$("cam").onclick = () => {
 
   const track =
-    stream.getVideoTracks()[0];
+    stream?.getVideoTracks()[0];
 
-
-  if (!track) {
-
-    await startCamera(
-      currentFacingMode
-    );
-
-    return;
-
-  }
+  if (!track) return;
 
 
   track.enabled =
@@ -505,132 +710,107 @@ $("cam").onclick = async () => {
 
 
 // =========================
-// ĐỔI CAMERA TRƯỚC / SAU
+// ĐỔI CAMERA
 // =========================
 
 $("switchCamera").onclick =
   async () => {
 
-    if (!stream) {
-      return;
-    }
+    if (!stream) return;
 
 
-    const newFacingMode =
+    const newMode =
       currentFacingMode ===
       "user"
         ? "environment"
         : "user";
 
 
-    await switchCamera(
-      newFacingMode
-    );
+    try {
 
-  };
+      const newStream =
+        await navigator.mediaDevices
+          .getUserMedia({
 
+            video: {
+              facingMode: {
+                exact: newMode
+              }
+            },
 
-// Đổi camera
-async function switchCamera(
-  facingMode
-) {
+            audio: false
 
-  try {
-
-    const newStream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video: {
-          facingMode: {
-            exact:
-              facingMode
-          }
-        },
-
-        audio: false
-
-      });
+          });
 
 
-    const newVideoTrack =
-      newStream.getVideoTracks()[0];
+      const newTrack =
+        newStream.getVideoTracks()[0];
 
 
-    // Thay camera trong kết nối
-    for (
-      const pc of peers.values()
-    ) {
+      for (
+        const pc of peers.values()
+      ) {
 
-      const sender =
-        pc.getSenders().find(
-          (s) =>
-            s.track &&
-            s.track.kind ===
-              "video"
-        );
+        const sender =
+          pc.getSenders().find(
+            s =>
+              s.track &&
+              s.track.kind ===
+                "video"
+          );
 
 
-      if (sender) {
+        if (sender) {
 
-        await sender.replaceTrack(
-          newVideoTrack
-        );
+          await sender.replaceTrack(
+            newTrack
+          );
+
+        }
 
       }
 
+
+      const oldTrack =
+        stream.getVideoTracks()[0];
+
+
+      if (oldTrack) {
+        oldTrack.stop();
+      }
+
+
+      stream =
+        new MediaStream([
+
+          newTrack,
+
+          ...stream.getAudioTracks()
+
+        ]);
+
+
+      $("localVideo").srcObject =
+        stream;
+
+
+      currentFacingMode =
+        newMode;
+
+
     }
 
+    catch (error) {
 
-    // Camera cũ
-    const oldTrack =
-      stream.getVideoTracks()[0];
+      console.error(error);
 
+      alert(
+        "Không thể đổi camera."
+      );
 
-    if (oldTrack) {
-      oldTrack.stop();
     }
 
-
-    // Giữ lại micro
-    const audioTracks =
-      stream.getAudioTracks();
-
-
-    stream =
-      new MediaStream([
-
-        newVideoTrack,
-
-        ...audioTracks
-
-      ]);
-
-
-    $("localVideo").srcObject =
-      stream;
-
-
-    currentFacingMode =
-      facingMode;
-
-
-    $("cam").textContent =
-      "📷 Camera";
-
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    alert(
-      "Không thể đổi camera trên thiết bị này."
-    );
-
-  }
-
-}
+  };
 
 
 // =========================
@@ -649,7 +829,7 @@ $("screen").onclick =
           });
 
 
-      const screenTrack =
+      const track =
         screenStream.getVideoTracks()[0];
 
 
@@ -659,7 +839,7 @@ $("screen").onclick =
 
         const sender =
           pc.getSenders().find(
-            (s) =>
+            s =>
               s.track &&
               s.track.kind ===
                 "video"
@@ -669,7 +849,7 @@ $("screen").onclick =
         if (sender) {
 
           await sender.replaceTrack(
-            screenTrack
+            track
           );
 
         }
@@ -680,14 +860,14 @@ $("screen").onclick =
       $("localVideo").srcObject =
         new MediaStream([
 
-          screenTrack,
+          track,
 
           ...stream.getAudioTracks()
 
         ]);
 
 
-      screenTrack.onended =
+      track.onended =
         () => {
 
           location.reload();
@@ -706,7 +886,7 @@ $("screen").onclick =
 
 
 // =========================
-// SAO CHÉP LINK MỜI
+// SAO CHÉP LINK
 // =========================
 
 $("copy").onclick =
@@ -724,15 +904,12 @@ $("copy").onclick =
         "✓ Đã sao chép";
 
 
-      setTimeout(
-        () => {
+      setTimeout(() => {
 
-          $("copy").textContent =
-            "🔗 Mời";
+        $("copy").textContent =
+          "🔗 Mời";
 
-        },
-        1500
-      );
+      }, 1500);
 
     }
 
@@ -748,11 +925,55 @@ $("copy").onclick =
 
 
 // =========================
-// CHAT / BÌNH LUẬN
+// PANEL NGƯỜI THAM GIA
 // =========================
 
+$("participantsBtn").onclick =
+  () => {
+
+    show(
+      $("participantsPanel")
+    );
+
+  };
+
+
+$("closeParticipants").onclick =
+  () => {
+
+    hide(
+      $("participantsPanel")
+    );
+
+  };
+
+
+// =========================
+// CHAT
+// =========================
+
+$("chatBtn").onclick =
+  () => {
+
+    show(
+      $("chatPanel")
+    );
+
+  };
+
+
+$("closeChat").onclick =
+  () => {
+
+    hide(
+      $("chatPanel")
+    );
+
+  };
+
+
 $("chatForm").onsubmit =
-  (event) => {
+  event => {
 
     event.preventDefault();
 
@@ -765,21 +986,15 @@ $("chatForm").onsubmit =
       input.value.trim();
 
 
-    if (!text) {
-      return;
-    }
+    if (!text) return;
 
 
     socket.emit(
       "chat",
       {
-
         room,
-
         name,
-
         text
-
       }
     );
 
@@ -789,45 +1004,33 @@ $("chatForm").onsubmit =
   };
 
 
-// Nhận tin nhắn
 socket.on(
   "chat",
-  (message) => {
+  message => {
 
     const div =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     div.className =
       "msg";
 
 
-    const nameElement =
-      document.createElement(
-        "b"
-      );
+    const nameEl =
+      document.createElement("b");
 
-    nameElement.textContent =
+    nameEl.textContent =
       message.name;
 
 
-    const textElement =
-      document.createElement(
-        "span"
-      );
+    const textEl =
+      document.createElement("span");
 
-    textElement.textContent =
+    textEl.textContent =
       message.text;
 
 
-    div.appendChild(
-      nameElement
-    );
-
-    div.appendChild(
-      textElement
-    );
+    div.appendChild(nameEl);
+    div.appendChild(textEl);
 
 
     $("messages")
@@ -842,21 +1045,58 @@ socket.on(
 
 
 // =========================
+// HỦY CHỜ
+// =========================
+
+$("cancelWaiting").onclick =
+  () => {
+
+    socket.disconnect();
+
+    location.href =
+      location.pathname;
+
+  };
+
+
+// =========================
+// PHÒNG ĐÓNG
+// =========================
+
+socket.on(
+  "room-closed",
+  () => {
+
+    alert(
+      "Chủ phòng đã đóng cuộc họp."
+    );
+
+    location.href =
+      location.pathname;
+
+  }
+);
+
+
+// =========================
 // RỜI PHÒNG
 // =========================
 
 $("leave").onclick =
   () => {
 
+    socket.emit(
+      "leave-room"
+    );
+
+
     if (stream) {
 
       stream
         .getTracks()
-        .forEach(
-          (track) => {
-            track.stop();
-          }
-        );
+        .forEach(track => {
+          track.stop();
+        });
 
     }
 
@@ -865,3 +1105,17 @@ $("leave").onclick =
       location.pathname;
 
   };
+
+
+// =========================
+// LỖI PHÒNG
+// =========================
+
+socket.on(
+  "room-error",
+  ({ message }) => {
+
+    alert(message);
+
+  }
+);
