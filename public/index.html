@@ -44,8 +44,40 @@
     >
 
     <button id="join">
-      🚪 Tham gia cuộc họp
+      🚪 Xin vào cuộc họp
     </button>
+
+  </main>
+
+
+  <!-- MÀN HÌNH CHỜ DUYỆT -->
+  <main id="waiting" class="container hidden">
+
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <h1>VMeet</h1>
+    </div>
+
+    <div class="waiting-card">
+
+      <div class="waiting-icon">
+        ⏳
+      </div>
+
+      <h2>Đang chờ duyệt</h2>
+
+      <p>
+        Yêu cầu tham gia của bạn đã được gửi.
+        Vui lòng chờ chủ phòng cho phép vào.
+      </p>
+
+      <div class="loader"></div>
+
+      <button id="cancelWaiting">
+        Hủy
+      </button>
+
+    </div>
 
   </main>
 
@@ -56,20 +88,37 @@
     <!-- HEADER -->
     <header class="meeting-header">
 
-      <div>
+      <div class="header-left">
+
         <strong>VMeet</strong>
+
         <span id="roomTitle"></span>
+
       </div>
 
-      <button id="copy" class="small-btn">
-        🔗 Mời
-      </button>
+      <div class="header-right">
+
+        <button id="copy" class="small-btn">
+          🔗 Mời
+        </button>
+
+        <button
+          id="participantsBtn"
+          class="small-btn"
+        >
+          👥 Người tham gia
+        </button>
+
+      </div>
 
     </header>
 
 
     <!-- VIDEO -->
-    <section id="videos" class="videos">
+    <section
+      id="videos"
+      class="videos"
+    >
 
       <div class="video-tile local">
 
@@ -108,19 +157,91 @@
         🖥️ Chia sẻ
       </button>
 
-      <button id="leave" class="danger">
+      <button id="chatBtn">
+        💬 Chat
+      </button>
+
+      <button
+        id="leave"
+        class="danger"
+      >
         📞 Rời phòng
       </button>
 
     </nav>
 
 
-    <!-- KHUNG CHAT -->
-    <aside class="chat">
+    <!-- PANEL NGƯỜI THAM GIA -->
+    <aside
+      id="participantsPanel"
+      class="side-panel hidden"
+    >
 
-      <h3>💬 Trò chuyện</h3>
+      <div class="panel-header">
 
-      <div id="messages" class="messages"></div>
+        <h3>
+          👥 Người tham gia
+        </h3>
+
+        <button id="closeParticipants">
+          ✕
+        </button>
+
+      </div>
+
+      <!-- YÊU CẦU ĐANG CHỜ -->
+      <div
+        id="joinRequests"
+        class="join-requests"
+      >
+
+        <h4>
+          Yêu cầu tham gia
+        </h4>
+
+        <div id="requestsList">
+        </div>
+
+      </div>
+
+
+      <!-- DANH SÁCH -->
+      <div class="participants-list">
+
+        <h4>
+          Đang trong phòng
+        </h4>
+
+        <div id="participantsList">
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- CHAT -->
+    <aside
+      id="chatPanel"
+      class="chat hidden"
+    >
+
+      <div class="panel-header">
+
+        <h3>
+          💬 Trò chuyện
+        </h3>
+
+        <button id="closeChat">
+          ✕
+        </button>
+
+      </div>
+
+      <div
+        id="messages"
+        class="messages"
+      ></div>
 
       <form id="chatForm">
 
@@ -140,6 +261,13 @@
     </aside>
 
   </main>
+
+
+  <!-- THÔNG BÁO -->
+  <div
+    id="toast"
+    class="toast hidden"
+  ></div>
 
 
   <!-- SOCKET.IO -->
