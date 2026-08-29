@@ -1,103 +1,96 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VMeet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div id="home" class="page">
-    <div class="card">
+  <!-- TRANG CHÍNH -->
+  <main id="home" class="container">
 
-      <div class="logo">V<span>Meet</span></div>
-
-      <h1>Họp trực tuyến đơn giản</h1>
-
-      <p>
-        Tạo phòng, gửi link và bắt đầu trò chuyện ngay trên trình duyệt.
-      </p>
-
-      <input id="name" placeholder="Tên của bạn">
-
-      <button id="create">
-        Tạo phòng họp
-      </button>
-
-      <div class="join">
-        <input id="room" placeholder="Nhập mã phòng">
-        <button id="join">
-          Tham gia
-        </button>
-      </div>
-
+    <div class="logo">
+      <div class="logo-icon">V</div>
+      <h1>VMeet</h1>
     </div>
-  </div>
+
+    <p class="subtitle">
+      Họp trực tuyến đơn giản – không cần tải ứng dụng
+    </p>
+
+    <input
+      id="name"
+      type="text"
+      placeholder="Nhập tên của bạn"
+      autocomplete="name"
+    >
+
+    <button id="create" class="primary">
+      ➕ Tạo cuộc họp mới
+    </button>
+
+    <div class="divider">
+      <span>hoặc</span>
+    </div>
+
+    <input
+      id="room"
+      type="text"
+      placeholder="Nhập mã phòng"
+      autocomplete="off"
+    >
+
+    <button id="join">
+      🚪 Tham gia cuộc họp
+    </button>
+
+  </main>
 
 
-  <div id="meeting" class="meeting hidden">
+  <!-- PHÒNG HỌP -->
+  <main id="meeting" class="meeting hidden">
 
-    <header>
+    <!-- HEADER -->
+    <header class="meeting-header">
 
-      <div class="logo small">
-        V<span>Meet</span>
+      <div>
+        <strong>VMeet</strong>
+        <span id="roomTitle"></span>
       </div>
 
-      <div id="roomTitle"></div>
-
-      <button id="copy">
+      <button id="copy" class="small-btn">
         🔗 Mời
       </button>
 
     </header>
 
 
-    <main>
+    <!-- VIDEO -->
+    <section id="videos" class="videos">
 
-      <section class="videos" id="videos">
+      <div class="video-tile local">
 
-        <div class="video-tile local">
+        <video
+          id="localVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
 
-          <video
-            id="localVideo"
-            autoplay
-            muted
-            playsinline>
-          </video>
+        <span id="localName">
+          Bạn
+        </span>
 
-          <span id="localName"></span>
+      </div>
 
-        </div>
-
-      </section>
-
-
-      <aside class="chat">
-
-        <h3>💬 Bình luận</h3>
-
-        <div id="messages"></div>
-
-        <form id="chatForm">
-
-          <input
-            id="chatInput"
-            placeholder="Viết bình luận...">
-
-          <button>
-            Gửi
-          </button>
-
-        </form>
-
-      </aside>
-
-    </main>
+    </section>
 
 
-    <footer>
+    <!-- THANH ĐIỀU KHIỂN -->
+    <nav class="controls">
 
       <button id="mic">
         🎤 Mic
@@ -107,20 +100,52 @@
         📷 Camera
       </button>
 
+      <button id="switchCamera">
+        🔄 Đổi camera
+      </button>
+
       <button id="screen">
-        🖥️ Chia sẻ màn hình
+        🖥️ Chia sẻ
       </button>
 
       <button id="leave" class="danger">
-        ☎ Rời phòng
+        📞 Rời phòng
       </button>
 
-    </footer>
-
-  </div>
+    </nav>
 
 
+    <!-- KHUNG CHAT -->
+    <aside class="chat">
+
+      <h3>💬 Trò chuyện</h3>
+
+      <div id="messages" class="messages"></div>
+
+      <form id="chatForm">
+
+        <input
+          id="chatInput"
+          type="text"
+          placeholder="Nhập tin nhắn..."
+          autocomplete="off"
+        >
+
+        <button type="submit">
+          Gửi
+        </button>
+
+      </form>
+
+    </aside>
+
+  </main>
+
+
+  <!-- SOCKET.IO -->
   <script src="/socket.io/socket.io.js"></script>
+
+  <!-- APP -->
   <script src="app.js"></script>
 
 </body>
