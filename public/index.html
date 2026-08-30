@@ -6,7 +6,12 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#111318"
   >
 
   <title>VMeet</title>
@@ -17,6 +22,7 @@
   >
 </head>
 
+
 <body>
 
   <!-- =========================
@@ -25,31 +31,37 @@
 
   <main
     id="home"
-    class="container"
+    class="home"
   >
 
     <div class="logo">
       <div class="logo-icon">V</div>
+
       <h1>VMeet</h1>
     </div>
+
 
     <p class="subtitle">
       Họp trực tuyến đơn giản
     </p>
 
+
     <input
       id="name"
       type="text"
       placeholder="Nhập tên của bạn"
+      maxlength="40"
       autocomplete="name"
     >
 
+
     <button
       id="create"
-      class="primary"
+      class="primary-btn"
     >
       ➕ Tạo cuộc họp mới
     </button>
+
 
     <p
       id="joinInfo"
@@ -58,14 +70,16 @@
       Bạn được mời tham gia cuộc họp
     </p>
 
+
     <button
       id="join"
-      class="primary hidden"
+      class="primary-btn hidden"
     >
       🚪 Tham gia cuộc họp
     </button>
 
   </main>
+
 
 
   <!-- =========================
@@ -77,32 +91,44 @@
     class="meeting hidden"
   >
 
-    <!-- HEADER -->
+
+    <!-- =======================
+         HEADER
+    ======================== -->
 
     <header class="meeting-header">
 
-      <div class="header-left">
 
-        <strong>VMeet</strong>
+      <div class="header-info">
 
-        <span id="roomTitle"></span>
+        <strong>
+          VMeet
+        </strong>
+
+        <span id="roomTitle">
+          Phòng
+        </span>
 
       </div>
 
-      <div class="header-right">
+
+      <div class="header-actions">
 
         <button
           id="copy"
-          class="small-btn"
+          class="header-btn"
+          aria-label="Mời người tham gia"
         >
-          🔗 Mời
+          🔗
         </button>
+
 
         <button
           id="participantsBtn"
-          class="small-btn"
+          class="header-btn"
+          aria-label="Người tham gia"
         >
-          👥 Người tham gia
+          👥
         </button>
 
       </div>
@@ -110,18 +136,23 @@
     </header>
 
 
-    <!-- =========================
-         VIDEO
-    ========================== -->
+
+    <!-- =======================
+         KHU VỰC VIDEO
+    ======================== -->
 
     <section
       id="videos"
       class="videos"
     >
 
+
+      <!-- VIDEO CHỦ PHÒNG / BẠN -->
+
       <div
-        class="video-tile local"
         id="localTile"
+        class="video-tile local-tile"
+        data-user-id=""
       >
 
         <video
@@ -131,143 +162,56 @@
           playsinline
         ></video>
 
-        <span id="localName">
-          Bạn
-        </span>
+
+        <div class="video-name">
+          <span id="localName">
+            Bạn
+          </span>
+
+          <span
+            id="localHostBadge"
+            class="host-badge hidden"
+          >
+            👑
+          </span>
+        </div>
+
+
+        <!-- Nhãn ghim -->
+
+        <div
+          id="localPinnedBadge"
+          class="pinned-badge hidden"
+        >
+          📌 Đã ghim
+        </div>
 
       </div>
 
     </section>
 
 
-    <!-- =========================
-         ĐIỀU KHIỂN
-    ========================== -->
 
-    <nav class="controls">
-
-      <button id="mic">
-        🎤 Mic
-      </button>
-
-      <button id="cam">
-        📷 Camera
-      </button>
-
-      <button id="switchCamera">
-        🔄 Đổi camera
-      </button>
-
-      <button id="screen">
-        🖥️ Chia sẻ
-      </button>
-
-      <button id="chatBtn">
-        💬 Chat
-      </button>
-
-      <button
-        id="leave"
-        class="danger"
-      >
-        📞 Rời phòng
-      </button>
-
-    </nav>
-
-
-    <!-- =========================
-         QUẢN LÝ NGƯỜI THAM GIA
-    ========================== -->
-
-    <aside
-      id="participantsPanel"
-      class="side-panel hidden"
-    >
-
-      <div class="panel-header">
-
-        <h3>
-          👥 Người tham gia
-        </h3>
-
-        <button
-          id="closeParticipants"
-        >
-          ✕
-        </button>
-
-      </div>
-
-
-      <!-- CÁC NÚT CHỦ PHÒNG -->
-
-      <div
-        id="hostControls"
-        class="host-controls hidden"
-      >
-
-        <h4>
-          👑 Điều khiển phòng
-        </h4>
-
-        <button id="muteAll">
-          🔇 Tắt mic tất cả
-        </button>
-
-        <button id="cameraOffAll">
-          📷 Tắt camera tất cả
-        </button>
-
-        <button id="unlockAllMic">
-          🎤 Cho phép bật mic
-        </button>
-
-        <button id="unlockAllCamera">
-          📷 Cho phép bật camera
-        </button>
-
-        <button id="lockRoom">
-          🔒 Khóa phòng
-        </button>
-
-      </div>
-
-
-      <!-- DANH SÁCH -->
-
-      <div class="participants-list">
-
-        <h4>
-          Trong phòng
-        </h4>
-
-        <div
-          id="participantsList"
-        ></div>
-
-      </div>
-
-    </aside>
-
-
-    <!-- =========================
+    <!-- =======================
          CHAT
-    ========================== -->
+    ======================== -->
 
-    <aside
+    <section
       id="chatPanel"
-      class="chat hidden"
+      class="chat-panel hidden"
     >
 
-      <div class="panel-header">
 
-        <h3>
+      <div class="chat-header">
+
+        <strong>
           💬 Trò chuyện
-        </h3>
+        </strong>
+
 
         <button
           id="closeChat"
+          class="close-btn"
         >
           ✕
         </button>
@@ -281,24 +225,212 @@
       ></div>
 
 
-      <form id="chatForm">
+      <form
+        id="chatForm"
+        class="chat-form"
+      >
 
         <input
           id="chatInput"
           type="text"
+          maxlength="500"
           placeholder="Nhập tin nhắn..."
           autocomplete="off"
         >
 
-        <button type="submit">
+
+        <button
+          type="submit"
+          class="send-btn"
+        >
           Gửi
         </button>
 
       </form>
 
-    </aside>
+    </section>
+
+
+
+    <!-- =======================
+         BẢNG NGƯỜI THAM GIA
+    ======================== -->
+
+    <section
+      id="participantsPanel"
+      class="participants-panel hidden"
+    >
+
+
+      <div class="panel-header">
+
+        <strong>
+          👥 Người tham gia
+        </strong>
+
+
+        <button
+          id="closeParticipants"
+          class="close-btn"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+
+      <!-- =====================
+           ĐIỀU KHIỂN CHỦ PHÒNG
+      ====================== -->
+
+      <div
+        id="hostControls"
+        class="host-controls hidden"
+      >
+
+        <div class="host-title">
+          👑 Điều khiển chủ phòng
+        </div>
+
+
+        <button
+          id="pinHost"
+          class="host-action"
+        >
+          📌 Ghim chủ phòng cho tất cả
+        </button>
+
+
+        <button
+          id="muteAll"
+          class="host-action"
+        >
+          🔇 Tắt mic tất cả
+        </button>
+
+
+        <button
+          id="cameraOffAll"
+          class="host-action"
+        >
+          📷 Tắt camera tất cả
+        </button>
+
+
+        <button
+          id="unlockAllMic"
+          class="host-action"
+        >
+          🎤 Cho phép bật mic
+        </button>
+
+
+        <button
+          id="unlockAllCamera"
+          class="host-action"
+        >
+          📷 Cho phép bật camera
+        </button>
+
+
+        <button
+          id="lockRoom"
+          class="host-action"
+        >
+          🔒 Khóa phòng
+        </button>
+
+      </div>
+
+
+
+      <!-- =====================
+           DANH SÁCH
+      ====================== -->
+
+      <div class="participants-content">
+
+        <div class="list-title">
+          Trong phòng
+        </div>
+
+
+        <div
+          id="participantsList"
+          class="participants-list"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =======================
+         THANH ĐIỀU KHIỂN
+    ======================== -->
+
+    <nav class="controls">
+
+
+      <button
+        id="mic"
+        class="control-btn"
+      >
+        🎤
+        <span>Mic</span>
+      </button>
+
+
+      <button
+        id="cam"
+        class="control-btn"
+      >
+        📷
+        <span>Camera</span>
+      </button>
+
+
+      <button
+        id="switchCamera"
+        class="control-btn"
+      >
+        🔄
+        <span>Đổi cam</span>
+      </button>
+
+
+      <button
+        id="screen"
+        class="control-btn"
+      >
+        🖥️
+        <span>Chia sẻ</span>
+      </button>
+
+
+      <button
+        id="chatBtn"
+        class="control-btn"
+      >
+        💬
+        <span>Chat</span>
+      </button>
+
+
+      <button
+        id="leave"
+        class="control-btn leave-btn"
+      >
+        📞
+        <span>Rời phòng</span>
+      </button>
+
+    </nav>
 
   </main>
+
 
 
   <!-- =========================
@@ -311,13 +443,24 @@
   ></div>
 
 
-  <!-- SOCKET.IO -->
 
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- =========================
+       SOCKET.IO
+  ========================== -->
 
-  <!-- APP -->
+  <script
+    src="/socket.io/socket.io.js"
+  ></script>
 
-  <script src="app.js"></script>
+
+  <!-- =========================
+       APP
+  ========================== -->
+
+  <script
+    src="app.js"
+  ></script>
+
 
 </body>
 
