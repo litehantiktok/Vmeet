@@ -290,23 +290,54 @@ button {
 }
 
 /* =====================================================
-   CẬP NHẬT CHÍNH: KHU VỰC VIDEO MAIN HOST + THUMBNAILS
+   BỐ CỤC MÀN HÌNH CHỦ PHÒNG (HOST) PHÓNG TO TOÀN BỘ
 ===================================================== */
 
 .videos {
   flex: 1;
   min-height: 0;
-  min-width: 0;
   width: 100%;
   padding: 8px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr auto; /* Hàng trên là Host (LỚN), Hàng dưới là Thumbnail (NHỎ) */
   gap: 8px;
   overflow: hidden;
   position: relative;
 }
 
-/* 1. Các ô xem trước của người tham gia (Thu nhỏ dạng dải cuộn ngang bên dưới) */
+/* Màn hình Host Pinned chính */
+.video-tile.pinned-tile {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  background: #1e2026;
+  z-index: 1;
+}
+
+.video-tile.pinned-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Giữ full khung hình không bị cắt */
+}
+
+/* Dải chứa danh sách thumbnail các người tham gia xếp hàng ngang bên dưới */
+.videos-thumb-wrapper {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  width: 100%;
+  max-height: 85px;
+  padding-bottom: 2px;
+  scrollbar-width: none; /* Ẩn thanh cuộn */
+}
+
+.videos-thumb-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tile của các người tham gia dạng Thumbnail thu nhỏ */
 .video-tile {
   position: relative;
   flex-shrink: 0;
@@ -318,8 +349,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all .25s ease;
-  order: 2;
   z-index: 2;
 }
 
@@ -328,22 +357,6 @@ button {
   height: 100%;
   object-fit: cover;
   display: block;
-  background: #292c35;
-}
-
-/* 2. Ô Chủ phòng (Host) luôn chiếm trọn diện tích lớn nhất ở giữa */
-.video-tile.pinned-tile {
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  order: 1;
-  z-index: 1;
-  border: 2px solid #3b82f6;
-}
-
-.video-tile.pinned-tile video {
-  object-fit: contain;
 }
 
 .camera-off-overlay {
@@ -685,5 +698,6 @@ button {
 @media (min-width: 700px) {
   .controls { display: flex; justify-content: center; gap: 7px; }
   .control-btn { width: 90px; max-width: 100px; }
+  .videos-thumb-wrapper { max-height: 105px; }
   .video-tile { width: 140px; height: 95px; }
 }
