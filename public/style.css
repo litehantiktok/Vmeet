@@ -38,9 +38,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    TRANG CHÍNH
-================================ */
+================================= */
 
 .home {
   width: min(
@@ -141,9 +141,203 @@ button {
 }
 
 
-/* ================================
+/* =================================
+   MÀN HÌNH XEM TRƯỚC
+================================= */
+
+.prejoin {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 200;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    max(15px, env(safe-area-inset-top))
+    max(15px, env(safe-area-inset-right))
+    max(15px, env(safe-area-inset-bottom))
+    max(15px, env(safe-area-inset-left));
+
+  background: #111318;
+}
+
+.prejoin-card {
+  width: min(
+    100%,
+    430px
+  );
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.prejoin-title {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  margin-bottom: 2px;
+}
+
+.prejoin-title strong {
+  font-size: 20px;
+}
+
+#prejoinRoom {
+  color: #9da4b1;
+
+  font-size: 12px;
+}
+
+.preview-video {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 16 / 10;
+
+  overflow: hidden;
+
+  border-radius: 15px;
+
+  background: #292c35;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, .08);
+}
+
+.preview-video video {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+.preview-off {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+  background: #292c35;
+
+  color: #fff;
+
+  font-size: 30px;
+}
+
+.preview-off span {
+  font-size: 12px;
+
+  color: #aeb4c0;
+}
+
+.preview-name {
+  position: absolute;
+
+  left: 10px;
+  bottom: 10px;
+
+  padding: 5px 9px;
+
+  border-radius: 7px;
+
+  background: rgba(0, 0, 0, .55);
+
+  font-size: 12px;
+}
+
+.preview-controls {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 8px;
+}
+
+.preview-control {
+  min-height: 50px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #30333b;
+
+  color: #fff;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  font-size: 17px;
+}
+
+.preview-control span {
+  font-size: 12px;
+}
+
+.preview-control.off {
+  background: #b42318;
+}
+
+.enter-btn {
+  width: 100%;
+
+  min-height: 52px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background: #fff;
+
+  color: #111318;
+
+  font-weight: 700;
+
+  font-size: 15px;
+}
+
+.cancel-btn {
+  min-height: 42px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #aeb4c0;
+
+  font-size: 13px;
+}
+
+
+/* =================================
    PHÒNG HỌP
-================================ */
+================================= */
 
 .meeting {
   position: relative;
@@ -160,9 +354,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    HEADER
-================================ */
+================================= */
 
 .meeting-header {
   width: 100%;
@@ -236,9 +430,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    VIDEO
-================================ */
+================================= */
 
 .videos {
   flex: 1;
@@ -283,12 +477,12 @@ button {
   background: #292c35;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
   transition:
-    grid-column .2s ease,
-    grid-row .2s ease;
+    all .25s ease;
 }
 
 .video-tile video {
@@ -300,6 +494,35 @@ button {
   display: block;
 
   background: #292c35;
+}
+
+.camera-off-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  background: #292c35;
+
+  color: #fff;
+
+  font-size: 28px;
+}
+
+.camera-off-overlay span {
+  font-size: 11px;
+
+  color: #aeb4c0;
 }
 
 .video-name {
@@ -314,20 +537,19 @@ button {
 
   border-radius: 6px;
 
-  background: rgba(
-    0,
-    0,
-    0,
-    .55
-  );
+  background: rgba(0, 0, 0, .55);
 
   color: #fff;
 
   font-size: 11px;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
+
+  z-index: 4;
 }
 
 .host-badge {
@@ -344,22 +566,17 @@ button {
 
   border-radius: 6px;
 
-  background: rgba(
-    0,
-    0,
-    0,
-    .65
-  );
+  background: rgba(0, 0, 0, .65);
 
   font-size: 11px;
 
-  z-index: 3;
+  z-index: 5;
 }
 
 
-/* ================================
+/* =================================
    VIDEO ĐƯỢC GHIM
-================================ */
+================================= */
 
 .video-tile.pinned-tile {
   grid-column: 1 / -1;
@@ -369,6 +586,8 @@ button {
   aspect-ratio: auto;
 
   min-height: 0;
+
+  z-index: 2;
 }
 
 .video-tile.pinned-tile video {
@@ -376,9 +595,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    THANH ĐIỀU KHIỂN
-================================ */
+================================= */
 
 .controls {
   width: 100%;
@@ -409,6 +628,7 @@ button {
   min-height: 45px;
 
   border: 0;
+
   border-radius: 9px;
 
   background: #30333b;
@@ -416,6 +636,7 @@ button {
   color: #fff;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: center;
@@ -432,7 +653,9 @@ button {
   font-size: 9px;
 
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
@@ -441,17 +664,17 @@ button {
 }
 
 
-/* ==================================================
-   CHAT - PHONG CÁCH LIVESTREAM / TIKTOK
-================================================== */
+/* =================================
+   CHAT - KIỂU TIKTOK LIVE
+================================= */
 
 .chat-panel {
   position: absolute;
 
   z-index: 50;
 
-  left: 10px;
-  right: 10px;
+  left: 8px;
+  right: auto;
 
   bottom:
     calc(
@@ -460,8 +683,8 @@ button {
     );
 
   width: min(
-    calc(100% - 20px),
-    390px
+    88vw,
+    350px
   );
 
   height: min(
@@ -470,56 +693,30 @@ button {
   );
 
   display: flex;
+
   flex-direction: column;
 
   background: rgba(
-    10,
-    10,
-    14,
-    .28
+    0,
+    0,
+    0,
+    .18
   );
 
   border: 0;
 
-  border-radius: 16px;
+  border-radius: 0;
 
   overflow: hidden;
 
-  box-shadow:
-    0 8px 35px
-    rgba(0, 0, 0, .25);
+  box-shadow: none;
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(2px);
 
-  animation:
-    chatAppear .18s ease-out;
+  -webkit-backdrop-filter: blur(2px);
+
+  pointer-events: auto;
 }
-
-
-/* ================================
-   HIỆU ỨNG CHAT HIỆN RA
-================================ */
-
-@keyframes chatAppear {
-
-  from {
-    opacity: 0;
-    transform:
-      translateY(12px);
-  }
-
-  to {
-    opacity: 1;
-    transform:
-      translateY(0);
-  }
-}
-
-
-/* ================================
-   HEADER CHAT
-================================ */
 
 .chat-header {
   min-height: 42px;
@@ -527,73 +724,38 @@ button {
   flex-shrink: 0;
 
   display: flex;
+
   align-items: center;
   justify-content: space-between;
 
-  padding:
-    0 9px 0 12px;
+  padding: 0 4px 0 9px;
 
-  background: rgba(
-    0,
-    0,
-    0,
-    .16
-  );
+  background: transparent;
 
-  border-bottom:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .08
-    );
+  border: 0;
+
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, .7);
 }
 
 .chat-header strong {
   font-size: 13px;
-
-  font-weight: 700;
-
-  color: rgba(
-    255,
-    255,
-    255,
-    .95
-  );
-
-  text-shadow:
-    0 1px 4px
-    rgba(0, 0, 0, .5);
 }
 
 .close-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 
   border: 0;
+
   border-radius: 50%;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    .12
-  );
+  background: rgba(0, 0, 0, .28);
 
   color: #fff;
 
-  font-size: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 17px;
 }
-
-
-/* ================================
-   DANH SÁCH TIN NHẮN
-================================ */
 
 .messages {
   flex: 1;
@@ -603,48 +765,35 @@ button {
   overflow-y: auto;
 
   padding:
-    8px
-    10px
-    10px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: flex-end;
-
-  gap: 5px;
+    5px 5px 8px 4px;
 
   scrollbar-width: none;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      black 10px,
+      black 100%
+    );
 }
 
 .messages::-webkit-scrollbar {
   display: none;
 }
 
-
-/* ================================
-   TIN NHẮN KIỂU TIKTOK
-================================ */
-
 .msg {
   width: fit-content;
 
-  max-width: 88%;
+  max-width: 90%;
 
-  padding:
-    3px 0;
+  margin-bottom: 5px;
 
-  margin: 0;
+  padding: 0;
 
   background: transparent;
 
-  color: rgba(
-    255,
-    255,
-    255,
-    .96
-  );
+  color: #fff;
 
   font-size: 13px;
 
@@ -653,82 +802,34 @@ button {
   overflow-wrap: anywhere;
 
   text-shadow:
-    0 1px 4px
-    rgba(0, 0, 0, .8);
-
-  animation:
-    messageAppear .15s ease-out;
+    0 1px 3px rgba(0, 0, 0, .95);
 }
 
-@keyframes messageAppear {
+.msg-name {
+  color: rgba(255, 255, 255, .65);
 
-  from {
-    opacity: 0;
-    transform:
-      translateY(5px);
-  }
+  margin-right: 5px;
 
-  to {
-    opacity: 1;
-    transform:
-      translateY(0);
-  }
+  font-size: 12px;
 }
 
-
-/*
-   Vì app.js hiện tại đang dùng:
-   name + ": " + text
-
-   nên phần tên vẫn sẽ hiển thị
-   cùng tin nhắn nhưng có hiệu ứng
-   giống chat livestream.
-*/
-
-.msg::first-letter {
-  font-weight: 600;
+.msg-text {
+  color: #fff;
 }
-
-
-/* ================================
-   THANH NHẬP CHAT
-================================ */
 
 .chat-form {
   flex-shrink: 0;
 
   display: flex;
 
-  gap: 7px;
+  gap: 6px;
 
-  padding:
-    7px 8px
-    calc(
-      8px +
-      env(safe-area-inset-bottom)
-    );
+  padding: 5px 4px;
 
-  background: rgba(
-    0,
-    0,
-    0,
-    .18
-  );
+  background: transparent;
 
-  border-top:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .07
-    );
+  border: 0;
 }
-
-
-/* ================================
-   Ô NHẬP
-================================ */
 
 #chatInput {
   flex: 1;
@@ -739,106 +840,51 @@ button {
 
   border:
     1px solid
-    rgba(
-      255,
-      255,
-      255,
-      .16
-    );
+    rgba(255, 255, 255, .25);
 
   border-radius: 20px;
 
-  padding:
-    0 13px;
+  padding: 0 13px;
 
   outline: none;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    .10
-  );
+  background:
+    rgba(0, 0, 0, .28);
 
   color: #fff;
 
-  backdrop-filter:
-    blur(8px);
+  backdrop-filter: blur(5px);
 
-  -webkit-backdrop-filter:
-    blur(8px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 #chatInput::placeholder {
-  color: rgba(
-    255,
-    255,
-    255,
-    .60
-  );
+  color: rgba(255, 255, 255, .7);
 }
-
-#chatInput:focus {
-  border-color:
-    rgba(
-      255,
-      255,
-      255,
-      .28
-    );
-
-  background: rgba(
-    255,
-    255,
-    255,
-    .14
-  );
-}
-
-
-/* ================================
-   NÚT GỬI
-================================ */
 
 .send-btn {
   width: 52px;
 
   flex-shrink: 0;
 
-  height: 38px;
-
   border: 0;
 
   border-radius: 20px;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    .90
-  );
+  background:
+    rgba(255, 255, 255, .9);
 
   color: #111318;
 
-  font-size: 12px;
-
   font-weight: 700;
 
-  transition:
-    transform .1s ease,
-    background .1s ease;
-}
-
-.send-btn:active {
-  transform: scale(.94);
-
-  background: #fff;
+  font-size: 12px;
 }
 
 
-/* ================================
+/* =================================
    PANEL NGƯỜI THAM GIA
-================================ */
+================================= */
 
 .participants-panel {
   position: absolute;
@@ -855,6 +901,7 @@ button {
   );
 
   display: flex;
+
   flex-direction: column;
 
   background: #fff;
@@ -876,6 +923,7 @@ button {
   flex-shrink: 0;
 
   display: flex;
+
   align-items: center;
   justify-content: space-between;
 
@@ -887,12 +935,14 @@ button {
 
 .panel-header .close-btn {
   color: #111318;
+
+  background: transparent;
 }
 
 
-/* ================================
+/* =================================
    CHỦ PHÒNG
-================================ */
+================================= */
 
 .host-controls {
   flex-shrink: 0;
@@ -924,6 +974,7 @@ button {
   min-height: 40px;
 
   border: 0;
+
   border-radius: 8px;
 
   background: #eef0f3;
@@ -936,9 +987,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    DANH SÁCH
-================================ */
+================================= */
 
 .participants-content {
   flex: 1;
@@ -948,6 +999,7 @@ button {
   overflow: hidden;
 
   display: flex;
+
   flex-direction: column;
 }
 
@@ -972,6 +1024,7 @@ button {
   min-height: 48px;
 
   display: flex;
+
   align-items: center;
 
   gap: 4px;
@@ -986,7 +1039,9 @@ button {
   min-width: 0;
 
   overflow: hidden;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 
   font-size: 13px;
@@ -999,6 +1054,7 @@ button {
   flex-shrink: 0;
 
   border: 0;
+
   border-radius: 7px;
 
   background: #eef0f3;
@@ -1007,9 +1063,9 @@ button {
 }
 
 
-/* ================================
+/* =================================
    TOAST
-================================ */
+================================= */
 
 .toast {
   position: fixed;
@@ -1048,9 +1104,9 @@ button {
 }
 
 
-/* ================================
-   IPHONE / ĐIỆN THOẠI NHỎ
-================================ */
+/* =================================
+   IPHONE NHỎ
+================================= */
 
 @media (max-width: 360px) {
 
@@ -1083,26 +1139,15 @@ button {
   }
 
   .chat-panel {
-    left: 7px;
-    right: 7px;
-
-    width: calc(100% - 14px);
-
-    height: 46dvh;
-
-    bottom:
-      calc(
-        64px +
-        env(safe-area-inset-bottom)
-      );
+    width: 92vw;
   }
 
 }
 
 
-/* ================================
+/* =================================
    ĐIỆN THOẠI NGANG
-================================ */
+================================= */
 
 @media (
   orientation: landscape
@@ -1136,8 +1181,7 @@ button {
 
   .chat-panel {
     left: auto;
-
-    right: 8px;
+    right: 5px;
 
     width: min(
       55vw,
@@ -1152,9 +1196,9 @@ button {
 }
 
 
-/* ================================
-   MÀN HÌNH TABLET / PC
-================================ */
+/* =================================
+   TABLET / PC
+================================= */
 
 @media (min-width: 700px) {
 
@@ -1177,21 +1221,8 @@ button {
 
   .control-btn {
     width: 90px;
+
     max-width: 100px;
-  }
-
-  .chat-panel {
-    left: 15px;
-
-    width: min(
-      390px,
-      38vw
-    );
-
-    height: min(
-      430px,
-      55dvh
-    );
   }
 
 }
