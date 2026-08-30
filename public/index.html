@@ -83,6 +83,139 @@
 
 
   <!-- =========================
+       XEM TRƯỚC TRƯỚC KHI VÀO
+  ========================== -->
+
+  <main
+    id="prejoin"
+    class="prejoin hidden"
+  >
+
+    <div class="prejoin-container">
+
+      <div class="prejoin-title">
+        <strong>
+          Tham gia VMeet
+        </strong>
+
+        <span id="prejoinRoom">
+          Chuẩn bị tham gia cuộc họp
+        </span>
+      </div>
+
+
+      <!-- CAMERA XEM TRƯỚC -->
+
+      <div class="preview-video-box">
+
+        <video
+          id="previewVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
+
+
+        <div
+          id="cameraOffOverlay"
+          class="camera-off-overlay hidden"
+        >
+          <div class="camera-off-icon">
+            📷
+          </div>
+
+          <span>
+            Camera đang tắt
+          </span>
+        </div>
+
+
+        <div class="preview-name">
+          <span id="previewName">
+            Bạn
+          </span>
+        </div>
+
+      </div>
+
+
+      <!-- ĐIỀU KHIỂN -->
+
+      <div class="prejoin-controls">
+
+        <button
+          id="previewMic"
+          class="preview-control active"
+          type="button"
+        >
+          <span class="preview-icon">
+            🎤
+          </span>
+
+          <span>
+            Mic
+          </span>
+        </button>
+
+
+        <button
+          id="previewCam"
+          class="preview-control active"
+          type="button"
+        >
+          <span class="preview-icon">
+            📷
+          </span>
+
+          <span>
+            Camera
+          </span>
+        </button>
+
+
+        <button
+          id="previewSwitchCamera"
+          class="preview-control"
+          type="button"
+        >
+          <span class="preview-icon">
+            🔄
+          </span>
+
+          <span>
+            Đổi cam
+          </span>
+        </button>
+
+      </div>
+
+
+      <!-- NÚT THAM GIA -->
+
+      <button
+        id="prejoinEnter"
+        class="prejoin-enter"
+        type="button"
+      >
+        🚪 Tham gia cuộc họp
+      </button>
+
+
+      <button
+        id="prejoinBack"
+        class="prejoin-back"
+        type="button"
+      >
+        ← Quay lại
+      </button>
+
+    </div>
+
+  </main>
+
+
+
+  <!-- =========================
        PHÒNG HỌP
   ========================== -->
 
@@ -164,6 +297,7 @@
 
 
         <div class="video-name">
+
           <span id="localName">
             Bạn
           </span>
@@ -174,6 +308,7 @@
           >
             👑
           </span>
+
         </div>
 
 
@@ -201,7 +336,6 @@
       class="chat-panel hidden"
     >
 
-
       <div class="chat-header">
 
         <strong>
@@ -212,6 +346,7 @@
         <button
           id="closeChat"
           class="close-btn"
+          type="button"
         >
           ✕
         </button>
@@ -261,7 +396,6 @@
       class="participants-panel hidden"
     >
 
-
       <div class="panel-header">
 
         <strong>
@@ -272,6 +406,7 @@
         <button
           id="closeParticipants"
           class="close-btn"
+          type="button"
         >
           ✕
         </button>
@@ -297,6 +432,7 @@
         <button
           id="pinHost"
           class="host-action"
+          type="button"
         >
           📌 Ghim chủ phòng cho tất cả
         </button>
@@ -305,6 +441,7 @@
         <button
           id="muteAll"
           class="host-action"
+          type="button"
         >
           🔇 Tắt mic tất cả
         </button>
@@ -313,6 +450,7 @@
         <button
           id="cameraOffAll"
           class="host-action"
+          type="button"
         >
           📷 Tắt camera tất cả
         </button>
@@ -321,6 +459,7 @@
         <button
           id="unlockAllMic"
           class="host-action"
+          type="button"
         >
           🎤 Cho phép bật mic
         </button>
@@ -329,6 +468,7 @@
         <button
           id="unlockAllCamera"
           class="host-action"
+          type="button"
         >
           📷 Cho phép bật camera
         </button>
@@ -337,6 +477,7 @@
         <button
           id="lockRoom"
           class="host-action"
+          type="button"
         >
           🔒 Khóa phòng
         </button>
@@ -373,10 +514,10 @@
 
     <nav class="controls">
 
-
       <button
         id="mic"
         class="control-btn"
+        type="button"
       >
         🎤
         <span>Mic</span>
@@ -386,6 +527,7 @@
       <button
         id="cam"
         class="control-btn"
+        type="button"
       >
         📷
         <span>Camera</span>
@@ -395,6 +537,7 @@
       <button
         id="switchCamera"
         class="control-btn"
+        type="button"
       >
         🔄
         <span>Đổi cam</span>
@@ -404,6 +547,7 @@
       <button
         id="screen"
         class="control-btn"
+        type="button"
       >
         🖥️
         <span>Chia sẻ</span>
@@ -413,6 +557,7 @@
       <button
         id="chatBtn"
         class="control-btn"
+        type="button"
       >
         💬
         <span>Chat</span>
@@ -422,6 +567,7 @@
       <button
         id="leave"
         class="control-btn leave-btn"
+        type="button"
       >
         📞
         <span>Rời phòng</span>
