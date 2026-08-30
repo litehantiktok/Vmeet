@@ -33,7 +33,7 @@ io.on("connection", (socket) => {
       rooms.set(room, {
         host: socket.id,
         locked: false,
-        pinnedForAll: true, // Mặc định luôn ghim Host
+        pinnedForAll: true,
         users: new Map()
       });
       console.log("Room created:", room);
