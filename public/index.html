@@ -25,9 +25,9 @@
 
 <body>
 
-  <!-- =========================
+  <!-- =================================
        TRANG CHÍNH
-  ========================== -->
+  ================================== -->
 
   <main
     id="home"
@@ -81,17 +81,16 @@
   </main>
 
 
-
-  <!-- =========================
-       XEM TRƯỚC TRƯỚC KHI VÀO
-  ========================== -->
+  <!-- =================================
+       MÀN HÌNH XEM TRƯỚC
+  ================================== -->
 
   <main
     id="prejoin"
     class="prejoin hidden"
   >
 
-    <div class="prejoin-container">
+    <div class="prejoin-card">
 
       <div class="prejoin-title">
         <strong>
@@ -99,14 +98,12 @@
         </strong>
 
         <span id="prejoinRoom">
-          Chuẩn bị tham gia cuộc họp
+          Phòng
         </span>
       </div>
 
 
-      <!-- CAMERA XEM TRƯỚC -->
-
-      <div class="preview-video-box">
+      <div class="preview-video">
 
         <video
           id="previewVideo"
@@ -117,16 +114,11 @@
 
 
         <div
-          id="cameraOffOverlay"
-          class="camera-off-overlay hidden"
+          id="previewCameraOff"
+          class="preview-off hidden"
         >
-          <div class="camera-off-icon">
-            📷
-          </div>
-
-          <span>
-            Camera đang tắt
-          </span>
+          📷
+          <span>Camera đang tắt</span>
         </div>
 
 
@@ -139,74 +131,41 @@
       </div>
 
 
-      <!-- ĐIỀU KHIỂN -->
-
-      <div class="prejoin-controls">
+      <div class="preview-controls">
 
         <button
           id="previewMic"
           class="preview-control active"
-          type="button"
         >
-          <span class="preview-icon">
-            🎤
-          </span>
-
-          <span>
-            Mic
-          </span>
+          🎤
+          <span>Mic</span>
         </button>
 
 
         <button
           id="previewCam"
           class="preview-control active"
-          type="button"
         >
-          <span class="preview-icon">
-            📷
-          </span>
-
-          <span>
-            Camera
-          </span>
-        </button>
-
-
-        <button
-          id="previewSwitchCamera"
-          class="preview-control"
-          type="button"
-        >
-          <span class="preview-icon">
-            🔄
-          </span>
-
-          <span>
-            Đổi cam
-          </span>
+          📷
+          <span>Camera</span>
         </button>
 
       </div>
 
 
-      <!-- NÚT THAM GIA -->
-
       <button
-        id="prejoinEnter"
-        class="prejoin-enter"
-        type="button"
+        id="enterMeeting"
+        class="enter-btn"
       >
-        🚪 Tham gia cuộc họp
+        🚪 Vào cuộc họp
       </button>
 
 
       <button
-        id="prejoinBack"
-        class="prejoin-back"
-        type="button"
+        id="cancelPrejoin"
+        class="cancel-btn"
       >
-        ← Quay lại
+        Quay lại
       </button>
 
     </div>
@@ -214,10 +173,9 @@
   </main>
 
 
-
-  <!-- =========================
+  <!-- =================================
        PHÒNG HỌP
-  ========================== -->
+  ================================== -->
 
   <main
     id="meeting"
@@ -225,12 +183,9 @@
   >
 
 
-    <!-- =======================
-         HEADER
-    ======================== -->
+    <!-- HEADER -->
 
     <header class="meeting-header">
-
 
       <div class="header-info">
 
@@ -269,18 +224,12 @@
     </header>
 
 
-
-    <!-- =======================
-         KHU VỰC VIDEO
-    ======================== -->
+    <!-- VIDEO -->
 
     <section
       id="videos"
       class="videos"
     >
-
-
-      <!-- VIDEO CHỦ PHÒNG / BẠN -->
 
       <div
         id="localTile"
@@ -294,6 +243,15 @@
           muted
           playsinline
         ></video>
+
+
+        <div
+          id="localCameraOff"
+          class="camera-off-overlay hidden"
+        >
+          📷
+          <span>Camera đang tắt</span>
+        </div>
 
 
         <div class="video-name">
@@ -312,8 +270,6 @@
         </div>
 
 
-        <!-- Nhãn ghim -->
-
         <div
           id="localPinnedBadge"
           class="pinned-badge hidden"
@@ -326,10 +282,9 @@
     </section>
 
 
-
-    <!-- =======================
+    <!-- =================================
          CHAT
-    ======================== -->
+    ================================== -->
 
     <section
       id="chatPanel"
@@ -342,11 +297,9 @@
           💬 Trò chuyện
         </strong>
 
-
         <button
           id="closeChat"
           class="close-btn"
-          type="button"
         >
           ✕
         </button>
@@ -386,10 +339,9 @@
     </section>
 
 
-
-    <!-- =======================
-         BẢNG NGƯỜI THAM GIA
-    ======================== -->
+    <!-- =================================
+         NGƯỜI THAM GIA
+    ================================== -->
 
     <section
       id="participantsPanel"
@@ -402,11 +354,9 @@
           👥 Người tham gia
         </strong>
 
-
         <button
           id="closeParticipants"
           class="close-btn"
-          type="button"
         >
           ✕
         </button>
@@ -414,10 +364,7 @@
       </div>
 
 
-
-      <!-- =====================
-           ĐIỀU KHIỂN CHỦ PHÒNG
-      ====================== -->
+      <!-- ĐIỀU KHIỂN CHỦ PHÒNG -->
 
       <div
         id="hostControls"
@@ -432,7 +379,6 @@
         <button
           id="pinHost"
           class="host-action"
-          type="button"
         >
           📌 Ghim chủ phòng cho tất cả
         </button>
@@ -441,7 +387,6 @@
         <button
           id="muteAll"
           class="host-action"
-          type="button"
         >
           🔇 Tắt mic tất cả
         </button>
@@ -450,7 +395,6 @@
         <button
           id="cameraOffAll"
           class="host-action"
-          type="button"
         >
           📷 Tắt camera tất cả
         </button>
@@ -459,7 +403,6 @@
         <button
           id="unlockAllMic"
           class="host-action"
-          type="button"
         >
           🎤 Cho phép bật mic
         </button>
@@ -468,7 +411,6 @@
         <button
           id="unlockAllCamera"
           class="host-action"
-          type="button"
         >
           📷 Cho phép bật camera
         </button>
@@ -477,18 +419,12 @@
         <button
           id="lockRoom"
           class="host-action"
-          type="button"
         >
           🔒 Khóa phòng
         </button>
 
       </div>
 
-
-
-      <!-- =====================
-           DANH SÁCH
-      ====================== -->
 
       <div class="participants-content">
 
@@ -507,17 +443,15 @@
     </section>
 
 
-
-    <!-- =======================
+    <!-- =================================
          THANH ĐIỀU KHIỂN
-    ======================== -->
+    ================================== -->
 
     <nav class="controls">
 
       <button
         id="mic"
         class="control-btn"
-        type="button"
       >
         🎤
         <span>Mic</span>
@@ -527,7 +461,6 @@
       <button
         id="cam"
         class="control-btn"
-        type="button"
       >
         📷
         <span>Camera</span>
@@ -537,7 +470,6 @@
       <button
         id="switchCamera"
         class="control-btn"
-        type="button"
       >
         🔄
         <span>Đổi cam</span>
@@ -547,7 +479,6 @@
       <button
         id="screen"
         class="control-btn"
-        type="button"
       >
         🖥️
         <span>Chia sẻ</span>
@@ -557,7 +488,6 @@
       <button
         id="chatBtn"
         class="control-btn"
-        type="button"
       >
         💬
         <span>Chat</span>
@@ -567,7 +497,6 @@
       <button
         id="leave"
         class="control-btn leave-btn"
-        type="button"
       >
         📞
         <span>Rời phòng</span>
@@ -578,10 +507,9 @@
   </main>
 
 
-
-  <!-- =========================
-       THÔNG BÁO
-  ========================== -->
+  <!-- =================================
+       TOAST
+  ================================== -->
 
   <div
     id="toast"
@@ -589,24 +517,14 @@
   ></div>
 
 
+  <!-- SOCKET.IO -->
 
-  <!-- =========================
-       SOCKET.IO
-  ========================== -->
-
-  <script
-    src="/socket.io/socket.io.js"
-  ></script>
+  <script src="/socket.io/socket.io.js"></script>
 
 
-  <!-- =========================
-       APP
-  ========================== -->
+  <!-- APP -->
 
-  <script
-    src="app.js"
-  ></script>
-
+  <script src="app.js"></script>
 
 </body>
 
