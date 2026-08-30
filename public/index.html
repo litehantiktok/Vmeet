@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>VMeet</title>
-  <link rel="stylesheet" href="style.css">
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
 
 <body>
 
-  <!-- TRANG CHÍNH -->
-  <main id="home" class="container">
+  <!-- =========================
+       TRANG CHÍNH
+  ========================== -->
+
+  <main
+    id="home"
+    class="container"
+  >
 
     <div class="logo">
       <div class="logo-icon">V</div>
@@ -18,7 +34,7 @@
     </div>
 
     <p class="subtitle">
-      Họp trực tuyến đơn giản – không cần tải ứng dụng
+      Họp trực tuyến đơn giản
     </p>
 
     <input
@@ -28,64 +44,41 @@
       autocomplete="name"
     >
 
-    <button id="create" class="primary">
+    <button
+      id="create"
+      class="primary"
+    >
       ➕ Tạo cuộc họp mới
     </button>
 
-    <div class="divider">
-      <span>hoặc</span>
-    </div>
-
-    <input
-      id="room"
-      type="text"
-      placeholder="Nhập mã phòng"
-      autocomplete="off"
+    <p
+      id="joinInfo"
+      class="join-info hidden"
     >
+      Bạn được mời tham gia cuộc họp
+    </p>
 
-    <button id="join">
-      🚪 Xin vào cuộc họp
+    <button
+      id="join"
+      class="primary hidden"
+    >
+      🚪 Tham gia cuộc họp
     </button>
 
   </main>
 
 
-  <!-- MÀN HÌNH CHỜ DUYỆT -->
-  <main id="waiting" class="container hidden">
+  <!-- =========================
+       PHÒNG HỌP
+  ========================== -->
 
-    <div class="logo">
-      <div class="logo-icon">V</div>
-      <h1>VMeet</h1>
-    </div>
-
-    <div class="waiting-card">
-
-      <div class="waiting-icon">
-        ⏳
-      </div>
-
-      <h2>Đang chờ duyệt</h2>
-
-      <p>
-        Yêu cầu tham gia của bạn đã được gửi.
-        Vui lòng chờ chủ phòng cho phép vào.
-      </p>
-
-      <div class="loader"></div>
-
-      <button id="cancelWaiting">
-        Hủy
-      </button>
-
-    </div>
-
-  </main>
-
-
-  <!-- PHÒNG HỌP -->
-  <main id="meeting" class="meeting hidden">
+  <main
+    id="meeting"
+    class="meeting hidden"
+  >
 
     <!-- HEADER -->
+
     <header class="meeting-header">
 
       <div class="header-left">
@@ -98,7 +91,10 @@
 
       <div class="header-right">
 
-        <button id="copy" class="small-btn">
+        <button
+          id="copy"
+          class="small-btn"
+        >
           🔗 Mời
         </button>
 
@@ -114,13 +110,19 @@
     </header>
 
 
-    <!-- VIDEO -->
+    <!-- =========================
+         VIDEO
+    ========================== -->
+
     <section
       id="videos"
       class="videos"
     >
 
-      <div class="video-tile local">
+      <div
+        class="video-tile local"
+        id="localTile"
+      >
 
         <video
           id="localVideo"
@@ -138,7 +140,10 @@
     </section>
 
 
-    <!-- THANH ĐIỀU KHIỂN -->
+    <!-- =========================
+         ĐIỀU KHIỂN
+    ========================== -->
+
     <nav class="controls">
 
       <button id="mic">
@@ -171,7 +176,10 @@
     </nav>
 
 
-    <!-- PANEL NGƯỜI THAM GIA -->
+    <!-- =========================
+         QUẢN LÝ NGƯỜI THAM GIA
+    ========================== -->
+
     <aside
       id="participantsPanel"
       class="side-panel hidden"
@@ -183,44 +191,70 @@
           👥 Người tham gia
         </h3>
 
-        <button id="closeParticipants">
+        <button
+          id="closeParticipants"
+        >
           ✕
         </button>
 
       </div>
 
-      <!-- YÊU CẦU ĐANG CHỜ -->
+
+      <!-- CÁC NÚT CHỦ PHÒNG -->
+
       <div
-        id="joinRequests"
-        class="join-requests"
+        id="hostControls"
+        class="host-controls hidden"
       >
 
         <h4>
-          Yêu cầu tham gia
+          👑 Điều khiển phòng
         </h4>
 
-        <div id="requestsList">
-        </div>
+        <button id="muteAll">
+          🔇 Tắt mic tất cả
+        </button>
+
+        <button id="cameraOffAll">
+          📷 Tắt camera tất cả
+        </button>
+
+        <button id="unlockAllMic">
+          🎤 Cho phép bật mic
+        </button>
+
+        <button id="unlockAllCamera">
+          📷 Cho phép bật camera
+        </button>
+
+        <button id="lockRoom">
+          🔒 Khóa phòng
+        </button>
 
       </div>
 
 
       <!-- DANH SÁCH -->
+
       <div class="participants-list">
 
         <h4>
-          Đang trong phòng
+          Trong phòng
         </h4>
 
-        <div id="participantsList">
-        </div>
+        <div
+          id="participantsList"
+        ></div>
 
       </div>
 
     </aside>
 
 
-    <!-- CHAT -->
+    <!-- =========================
+         CHAT
+    ========================== -->
+
     <aside
       id="chatPanel"
       class="chat hidden"
@@ -232,16 +266,20 @@
           💬 Trò chuyện
         </h3>
 
-        <button id="closeChat">
+        <button
+          id="closeChat"
+        >
           ✕
         </button>
 
       </div>
 
+
       <div
         id="messages"
         class="messages"
       ></div>
+
 
       <form id="chatForm">
 
@@ -263,7 +301,10 @@
   </main>
 
 
-  <!-- THÔNG BÁO -->
+  <!-- =========================
+       THÔNG BÁO
+  ========================== -->
+
   <div
     id="toast"
     class="toast hidden"
@@ -271,10 +312,13 @@
 
 
   <!-- SOCKET.IO -->
+
   <script src="/socket.io/socket.io.js"></script>
 
   <!-- APP -->
+
   <script src="app.js"></script>
 
 </body>
+
 </html>
