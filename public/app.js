@@ -437,23 +437,32 @@ function createRemoteVideo(userId, stream) {
   applyPinnedHost();
 }
 
-// CẬP NHẬT: TỰ ĐỘNG GHIM MÀN HÌNH CHỦ PHÒNG LỚN NHẤT
+// LOGIC GHIM CỐ ĐỊNH CHỦ PHÒNG LUÔN LỚN NHẤT
 function applyPinnedHost() {
   if (!pinnedHostId) {
     const host = participants.find((user) => user.isHost);
     if (host) pinnedHostId = host.id;
   }
 
+  let thumbWrapper = document.querySelector(".videos-thumb-wrapper");
+  if (!thumbWrapper) {
+    thumbWrapper = document.createElement("div");
+    thumbWrapper.className = "videos-thumb-wrapper";
+    videos.appendChild(thumbWrapper);
+  }
+
   document.querySelectorAll(".video-tile").forEach((tile) => {
     const uId = tile.dataset.userId;
+    const badge = tile.querySelector(".pinned-badge");
+
     if (uId === pinnedHostId) {
       tile.classList.add("pinned-tile");
-      const badge = tile.querySelector(".pinned-badge");
       if (badge) badge.classList.remove("hidden");
+      videos.insertBefore(tile, thumbWrapper);
     } else {
       tile.classList.remove("pinned-tile");
-      const badge = tile.querySelector(".pinned-badge");
       if (badge) badge.classList.add("hidden");
+      thumbWrapper.appendChild(tile);
     }
   });
 }
@@ -467,6 +476,7 @@ function removeRemoteVideo(userId) {
     delete peerConnections[userId];
   }
   delete pendingCandidates[userId];
+  applyPinnedHost();
 }
 
 socket.on("user-joined", async (user) => {
