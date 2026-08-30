@@ -1,1536 +1,467 @@
-const socket = io();
+<!DOCTYPE html>
+<html lang="vi">
 
-const $ = (id) => document.getElementById(id);
+<head>
+  <meta charset="UTF-8">
 
-let name = "";
-let room = "";
-let stream = null;
-let isHost = false;
-let facingMode = "user";
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
-const peers = new Map();
+  <meta
+    name="theme-color"
+    content="#111318"
+  >
 
+  <title>VMeet</title>
 
-// =========================
-// KHỞI ĐỘNG
-// =========================
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+</head>
 
-const params = new URLSearchParams(
-  window.location.search
-);
 
-const roomFromLink =
-  params.get("room");
+<body>
 
+  <!-- =========================
+       TRANG CHÍNH
+  ========================== -->
 
-// Nếu link có phòng
-if (roomFromLink) {
+  <main
+    id="home"
+    class="home"
+  >
 
-  room =
-    roomFromLink.toUpperCase();
+    <div class="logo">
+      <div class="logo-icon">V</div>
 
-  $("joinInfo").classList.remove(
-    "hidden"
-  );
+      <h1>VMeet</h1>
+    </div>
 
-  $("join").classList.remove(
-    "hidden"
-  );
 
-  $("create").classList.add(
-    "hidden"
-  );
+    <p class="subtitle">
+      Họp trực tuyến đơn giản
+    </p>
 
-}
 
+    <input
+      id="name"
+      type="text"
+      placeholder="Nhập tên của bạn"
+      maxlength="40"
+      autocomplete="name"
+    >
 
-// =========================
-// TẠO PHÒNG
-// =========================
 
-$("create").onclick =
-  async () => {
+    <button
+      id="create"
+      class="primary-btn"
+    >
+      ➕ Tạo cuộc họp mới
+    </button>
 
-    name =
-      $("name").value.trim();
 
-    if (!name) {
+    <p
+      id="joinInfo"
+      class="join-info hidden"
+    >
+      Bạn được mời tham gia cuộc họp
+    </p>
 
-      alert(
-        "Vui lòng nhập tên của bạn."
-      );
 
-      return;
+    <button
+      id="join"
+      class="primary-btn hidden"
+    >
+      🚪 Tham gia cuộc họp
+    </button>
 
-    }
+  </main>
 
 
-    room =
-      Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
 
+  <!-- =========================
+       PHÒNG HỌP
+  ========================== -->
 
-    isHost = true;
+  <main
+    id="meeting"
+    class="meeting hidden"
+  >
 
 
-    socket.emit(
-      "join-room",
-      {
+    <!-- =======================
+         HEADER
+    ======================== -->
 
-        room,
+    <header class="meeting-header">
 
-        name,
 
-        create: true
+      <div class="header-info">
 
-      }
-    );
+        <strong>
+          VMeet
+        </strong>
 
-  };
+        <span id="roomTitle">
+          Phòng
+        </span>
 
+      </div>
 
-// =========================
-// THAM GIA BẰNG LINK
-// =========================
 
-$("join").onclick =
-  async () => {
+      <div class="header-actions">
 
-    name =
-      $("name").value.trim();
+        <button
+          id="copy"
+          class="header-btn"
+          aria-label="Mời người tham gia"
+        >
+          🔗
+        </button>
 
-    if (!name) {
 
-      alert(
-        "Vui lòng nhập tên của bạn."
-      );
+        <button
+          id="participantsBtn"
+          class="header-btn"
+          aria-label="Người tham gia"
+        >
+          👥
+        </button>
 
-      return;
+      </div>
 
-    }
+    </header>
 
 
-    socket.emit(
-      "join-room",
-      {
 
-        room,
+    <!-- =======================
+         KHU VỰC VIDEO
+    ======================== -->
 
-        name,
+    <section
+      id="videos"
+      class="videos"
+    >
 
-        create: false
 
-      }
-    );
+      <!-- VIDEO CHỦ PHÒNG / BẠN -->
 
-  };
+      <div
+        id="localTile"
+        class="video-tile local-tile"
+        data-user-id=""
+      >
 
+        <video
+          id="localVideo"
+          autoplay
+          muted
+          playsinline
+        ></video>
 
-// =========================
-// ĐÃ VÀO PHÒNG
-// =========================
 
-socket.on(
-  "room-joined",
-  async ({
-    room: joinedRoom,
-    isHost: host
-  }) => {
+        <div class="video-name">
+          <span id="localName">
+            Bạn
+          </span>
 
-    room =
-      joinedRoom;
+          <span
+            id="localHostBadge"
+            class="host-badge hidden"
+          >
+            👑
+          </span>
+        </div>
 
-    isHost =
-      host;
 
+        <!-- Nhãn ghim -->
 
-    // URL phòng
-    history.replaceState(
-      {},
-      "",
-      "?room=" +
-      encodeURIComponent(room)
-    );
+        <div
+          id="localPinnedBadge"
+          class="pinned-badge hidden"
+        >
+          📌 Đã ghim
+        </div>
 
+      </div>
 
-    hide(
-      $("home")
-    );
+    </section>
 
-    show(
-      $("meeting")
-    );
 
 
-    $("roomTitle").textContent =
-      "Phòng: " + room;
+    <!-- =======================
+         CHAT
+    ======================== -->
 
+    <section
+      id="chatPanel"
+      class="chat-panel hidden"
+    >
 
-    $("localName").textContent =
-      name;
 
+      <div class="chat-header">
 
-    // Hiện điều khiển host
-    if (isHost) {
+        <strong>
+          💬 Trò chuyện
+        </strong>
 
-      show(
-        $("hostControls")
-      );
 
-    }
+        <button
+          id="closeChat"
+          class="close-btn"
+        >
+          ✕
+        </button>
 
+      </div>
 
-    await startCamera();
 
-  }
-);
+      <div
+        id="messages"
+        class="messages"
+      ></div>
 
 
-// =========================
-// CAMERA + MIC
-// =========================
+      <form
+        id="chatForm"
+        class="chat-form"
+      >
 
-async function startCamera() {
+        <input
+          id="chatInput"
+          type="text"
+          maxlength="500"
+          placeholder="Nhập tin nhắn..."
+          autocomplete="off"
+        >
 
-  try {
 
-    stream =
-      await navigator.mediaDevices
-        .getUserMedia({
+        <button
+          type="submit"
+          class="send-btn"
+        >
+          Gửi
+        </button>
 
-          video: {
-            facingMode: {
-              ideal: facingMode
-            }
-          },
+      </form>
 
-          audio: true
+    </section>
 
-        });
 
 
-    $("localVideo").srcObject =
-      stream;
+    <!-- =======================
+         BẢNG NGƯỜI THAM GIA
+    ======================== -->
 
-  }
+    <section
+      id="participantsPanel"
+      class="participants-panel hidden"
+    >
 
-  catch (error) {
 
-    console.error(error);
+      <div class="panel-header">
 
-    alert(
-      "Không thể mở camera hoặc micro. Hãy cho phép quyền Camera và Micro."
-    );
+        <strong>
+          👥 Người tham gia
+        </strong>
 
-  }
 
-}
+        <button
+          id="closeParticipants"
+          class="close-btn"
+        >
+          ✕
+        </button>
 
+      </div>
 
-// =========================
-// THÊM NGƯỜI
-// =========================
 
-function createPeer(
-  userId,
-  userName,
-  initiator
-) {
 
-  if (peers.has(userId)) {
+      <!-- =====================
+           ĐIỀU KHIỂN CHỦ PHÒNG
+      ====================== -->
 
-    return peers.get(userId);
+      <div
+        id="hostControls"
+        class="host-controls hidden"
+      >
 
-  }
+        <div class="host-title">
+          👑 Điều khiển chủ phòng
+        </div>
 
 
-  const pc =
-    new RTCPeerConnection({
+        <button
+          id="pinHost"
+          class="host-action"
+        >
+          📌 Ghim chủ phòng cho tất cả
+        </button>
 
-      iceServers: [
 
-        {
-          urls:
-            "stun:stun.l.google.com:19302"
-        }
+        <button
+          id="muteAll"
+          class="host-action"
+        >
+          🔇 Tắt mic tất cả
+        </button>
 
-      ]
 
-    });
+        <button
+          id="cameraOffAll"
+          class="host-action"
+        >
+          📷 Tắt camera tất cả
+        </button>
 
 
-  if (stream) {
+        <button
+          id="unlockAllMic"
+          class="host-action"
+        >
+          🎤 Cho phép bật mic
+        </button>
 
-    stream
-      .getTracks()
-      .forEach(
-        track => {
 
-          pc.addTrack(
-            track,
-            stream
-          );
+        <button
+          id="unlockAllCamera"
+          class="host-action"
+        >
+          📷 Cho phép bật camera
+        </button>
 
-        }
-      );
 
-  }
+        <button
+          id="lockRoom"
+          class="host-action"
+        >
+          🔒 Khóa phòng
+        </button>
 
+      </div>
 
-  const tile =
-    document.createElement(
-      "div"
-    );
 
-  tile.className =
-    "video-tile";
 
-  tile.id =
-    "peer-" + userId;
+      <!-- =====================
+           DANH SÁCH
+      ====================== -->
 
+      <div class="participants-content">
 
-  const video =
-    document.createElement(
-      "video"
-    );
+        <div class="list-title">
+          Trong phòng
+        </div>
 
-  video.autoplay =
-    true;
 
-  video.playsInline =
-    true;
+        <div
+          id="participantsList"
+          class="participants-list"
+        ></div>
 
+      </div>
 
-  const label =
-    document.createElement(
-      "span"
-    );
+    </section>
 
-  label.textContent =
-    userName;
 
 
-  tile.appendChild(
-    video
-  );
+    <!-- =======================
+         THANH ĐIỀU KHIỂN
+    ======================== -->
 
-  tile.appendChild(
-    label
-  );
+    <nav class="controls">
 
 
-  $("videos").appendChild(
-    tile
-  );
+      <button
+        id="mic"
+        class="control-btn"
+      >
+        🎤
+        <span>Mic</span>
+      </button>
 
 
-  pc.ontrack =
-    event => {
+      <button
+        id="cam"
+        class="control-btn"
+      >
+        📷
+        <span>Camera</span>
+      </button>
 
-      video.srcObject =
-        event.streams[0];
 
-    };
+      <button
+        id="switchCamera"
+        class="control-btn"
+      >
+        🔄
+        <span>Đổi cam</span>
+      </button>
 
 
-  pc.onicecandidate =
-    event => {
+      <button
+        id="screen"
+        class="control-btn"
+      >
+        🖥️
+        <span>Chia sẻ</span>
+      </button>
 
-      if (!event.candidate)
-        return;
 
+      <button
+        id="chatBtn"
+        class="control-btn"
+      >
+        💬
+        <span>Chat</span>
+      </button>
 
-      socket.emit(
-        "signal",
-        {
 
-          to: userId,
+      <button
+        id="leave"
+        class="control-btn leave-btn"
+      >
+        📞
+        <span>Rời phòng</span>
+      </button>
 
-          data: {
-            candidate:
-              event.candidate
-          }
+    </nav>
 
-        }
-      );
+  </main>
 
-    };
 
 
-  peers.set(
-    userId,
-    pc
-  );
+  <!-- =========================
+       THÔNG BÁO
+  ========================== -->
 
+  <div
+    id="toast"
+    class="toast hidden"
+  ></div>
 
-  if (initiator) {
 
-    createOffer(
-      userId,
-      pc
-    );
 
-  }
+  <!-- =========================
+       SOCKET.IO
+  ========================== -->
 
+  <script
+    src="/socket.io/socket.io.js"
+  ></script>
 
-  return pc;
 
-}
+  <!-- =========================
+       APP
+  ========================== -->
 
+  <script
+    src="app.js"
+  ></script>
 
-// =========================
-// TẠO OFFER
-// =========================
 
-async function createOffer(
-  userId,
-  pc
-) {
+</body>
 
-  try {
-
-    const offer =
-      await pc.createOffer();
-
-
-    await pc.setLocalDescription(
-      offer
-    );
-
-
-    socket.emit(
-      "signal",
-      {
-
-        to: userId,
-
-        data: {
-          sdp:
-            pc.localDescription
-        }
-
-      }
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-  }
-
-}
-
-
-// =========================
-// DANH SÁCH NGƯỜI
-// =========================
-
-socket.on(
-  "participants",
-  users => {
-
-    renderParticipants(
-      users
-    );
-
-
-    users.forEach(
-      user => {
-
-        if (
-          user.id ===
-          socket.id
-        ) {
-          return;
-        }
-
-
-        if (
-          !peers.has(
-            user.id
-          )
-        ) {
-
-          // ID socket nhỏ hơn làm initiator
-          const initiator =
-            socket.id <
-            user.id;
-
-
-          createPeer(
-            user.id,
-            user.name,
-            initiator
-          );
-
-        }
-
-      }
-    );
-
-  }
-);
-
-
-// =========================
-// NGƯỜI MỚI
-// =========================
-
-socket.on(
-  "user-joined",
-  user => {
-
-    if (
-      user.id ===
-      socket.id
-    ) {
-      return;
-    }
-
-
-    const initiator =
-      socket.id <
-      user.id;
-
-
-    createPeer(
-      user.id,
-      user.name,
-      initiator
-    );
-
-  }
-);
-
-
-// =========================
-// WEBRTC SIGNAL
-// =========================
-
-socket.on(
-  "signal",
-  async ({
-    from,
-    data
-  }) => {
-
-    let pc =
-      peers.get(from);
-
-
-    if (!pc) {
-
-      pc =
-        createPeer(
-          from,
-          "Người tham gia",
-          false
-        );
-
-    }
-
-
-    try {
-
-      if (data.sdp) {
-
-        await pc.setRemoteDescription(
-          data.sdp
-        );
-
-
-        if (
-          data.sdp.type ===
-          "offer"
-        ) {
-
-          const answer =
-            await pc.createAnswer();
-
-
-          await pc.setLocalDescription(
-            answer
-          );
-
-
-          socket.emit(
-            "signal",
-            {
-
-              to: from,
-
-              data: {
-                sdp:
-                  pc.localDescription
-              }
-
-            }
-          );
-
-        }
-
-      }
-
-
-      if (data.candidate) {
-
-        await pc.addIceCandidate(
-          data.candidate
-        );
-
-      }
-
-    }
-
-    catch (error) {
-
-      console.error(
-        "WebRTC error:",
-        error
-      );
-
-    }
-
-  }
-);
-
-
-// =========================
-// NGƯỜI RỜI
-// =========================
-
-socket.on(
-  "user-left",
-  ({ id }) => {
-
-    removePeer(
-      id
-    );
-
-  }
-);
-
-
-function removePeer(id) {
-
-  const pc =
-    peers.get(id);
-
-
-  if (pc) {
-
-    pc.close();
-
-    peers.delete(id);
-
-  }
-
-
-  const tile =
-    $("peer-" + id);
-
-
-  if (tile) {
-
-    tile.remove();
-
-  }
-
-}
-
-
-// =========================
-// MIC CỦA BẠN
-// =========================
-
-$("mic").onclick =
-  () => {
-
-    const track =
-      stream?.getAudioTracks()[0];
-
-
-    if (!track)
-      return;
-
-
-    track.enabled =
-      !track.enabled;
-
-
-    $("mic").textContent =
-      track.enabled
-        ? "🎤 Mic"
-        : "🔇 Mic tắt";
-
-  };
-
-
-// =========================
-// CAMERA CỦA BẠN
-// =========================
-
-$("cam").onclick =
-  () => {
-
-    const track =
-      stream?.getVideoTracks()[0];
-
-
-    if (!track)
-      return;
-
-
-    track.enabled =
-      !track.enabled;
-
-
-    $("cam").textContent =
-      track.enabled
-        ? "📷 Camera"
-        : "🚫 Camera tắt";
-
-  };
-
-
-// =========================
-// ĐỔI CAMERA
-// =========================
-
-$("switchCamera").onclick =
-  async () => {
-
-    if (!stream)
-      return;
-
-
-    const newFacing =
-      facingMode ===
-      "user"
-        ? "environment"
-        : "user";
-
-
-    try {
-
-      const newStream =
-        await navigator.mediaDevices
-          .getUserMedia({
-
-            video: {
-              facingMode: {
-                exact:
-                  newFacing
-              }
-            },
-
-            audio: false
-
-          });
-
-
-      const newTrack =
-        newStream
-          .getVideoTracks()[0];
-
-
-      for (
-        const pc
-        of peers.values()
-      ) {
-
-        const sender =
-          pc.getSenders()
-            .find(
-              s =>
-                s.track &&
-                s.track.kind ===
-                "video"
-            );
-
-
-        if (sender) {
-
-          await sender.replaceTrack(
-            newTrack
-          );
-
-        }
-
-      }
-
-
-      const oldTrack =
-        stream.getVideoTracks()[0];
-
-
-      if (oldTrack) {
-
-        oldTrack.stop();
-
-      }
-
-
-      stream =
-        new MediaStream([
-
-          newTrack,
-
-          ...stream.getAudioTracks()
-
-        ]);
-
-
-      $("localVideo").srcObject =
-        stream;
-
-
-      facingMode =
-        newFacing;
-
-    }
-
-    catch (error) {
-
-      console.error(error);
-
-      alert(
-        "Không thể đổi camera."
-      );
-
-    }
-
-  };
-
-
-// =========================
-// CHIA SẺ MÀN HÌNH
-// =========================
-
-$("screen").onclick =
-  async () => {
-
-    try {
-
-      const screenStream =
-        await navigator.mediaDevices
-          .getDisplayMedia({
-
-            video: true
-
-          });
-
-
-      const screenTrack =
-        screenStream
-          .getVideoTracks()[0];
-
-
-      for (
-        const pc
-        of peers.values()
-      ) {
-
-        const sender =
-          pc.getSenders()
-            .find(
-              s =>
-                s.track &&
-                s.track.kind ===
-                "video"
-            );
-
-
-        if (sender) {
-
-          await sender.replaceTrack(
-            screenTrack
-          );
-
-        }
-
-      }
-
-
-      $("localVideo").srcObject =
-        new MediaStream([
-
-          screenTrack,
-
-          ...stream.getAudioTracks()
-
-        ]);
-
-
-      screenTrack.onended =
-        () => {
-
-          location.reload();
-
-        };
-
-    }
-
-    catch (error) {
-
-      console.error(error);
-
-    }
-
-  };
-
-
-// =========================
-// COPY LINK
-// =========================
-
-$("copy").onclick =
-  async () => {
-
-    try {
-
-      await navigator.clipboard
-        .writeText(
-          location.href
-        );
-
-
-      $("copy").textContent =
-        "✓ Đã sao chép";
-
-
-      setTimeout(
-        () => {
-
-          $("copy").textContent =
-            "🔗 Mời";
-
-        },
-        1500
-      );
-
-    }
-
-    catch (error) {
-
-      alert(
-        "Không thể sao chép link."
-      );
-
-    }
-
-  };
-
-
-// =========================
-// PANEL NGƯỜI THAM GIA
-// =========================
-
-$("participantsBtn").onclick =
-  () => {
-
-    show(
-      $("participantsPanel")
-    );
-
-  };
-
-
-$("closeParticipants").onclick =
-  () => {
-
-    hide(
-      $("participantsPanel")
-    );
-
-  };
-
-
-// =========================
-// HIỂN THỊ NGƯỜI
-// =========================
-
-function renderParticipants(
-  users
-) {
-
-  const list =
-    $("participantsList");
-
-
-  list.innerHTML =
-    "";
-
-
-  users.forEach(
-    user => {
-
-      const item =
-        document.createElement(
-          "div"
-        );
-
-      item.className =
-        "participant";
-
-
-      const nameEl =
-        document.createElement(
-          "span"
-        );
-
-      nameEl.textContent =
-        user.name +
-        (
-          user.isHost
-            ? " 👑"
-            : ""
-        );
-
-
-      item.appendChild(
-        nameEl
-      );
-
-
-      // Các nút quản lý chỉ hiện cho host
-      if (
-        isHost &&
-        user.id !==
-          socket.id
-      ) {
-
-        const mute =
-          document.createElement(
-            "button"
-          );
-
-        mute.textContent =
-          user.micLocked
-            ? "🔓 Mic"
-            : "🔇 Mic";
-
-
-        mute.onclick =
-          () => {
-
-            socket.emit(
-              user.micLocked
-                ? "host-unlock-mic"
-                : "host-mute-user",
-              {
-                userId:
-                  user.id
-              }
-            );
-
-          };
-
-
-        const camera =
-          document.createElement(
-            "button"
-          );
-
-        camera.textContent =
-          user.cameraLocked
-            ? "🔓 Cam"
-            : "📷 Cam";
-
-
-        camera.onclick =
-          () => {
-
-            socket.emit(
-              user.cameraLocked
-                ? "host-unlock-camera"
-                : "host-camera-off",
-              {
-                userId:
-                  user.id
-              }
-            );
-
-          };
-
-
-        const remove =
-          document.createElement(
-            "button"
-          );
-
-        remove.textContent =
-          "🚫";
-
-
-        remove.onclick =
-          () => {
-
-            if (
-              confirm(
-                "Mời người này ra khỏi phòng?"
-              )
-            ) {
-
-              socket.emit(
-                "host-remove-user",
-                {
-                  userId:
-                    user.id
-                }
-              );
-
-            }
-
-          };
-
-
-        item.appendChild(
-          mute
-        );
-
-        item.appendChild(
-          camera
-        );
-
-        item.appendChild(
-          remove
-        );
-
-      }
-
-
-      list.appendChild(
-        item
-      );
-
-    }
-  );
-
-}
-
-
-// =========================
-// HOST: TẮT MIC TẤT CẢ
-// =========================
-
-$("muteAll").onclick =
-  () => {
-
-    socket.emit(
-      "host-mute-all"
-    );
-
-  };
-
-
-// =========================
-// HOST: TẮT CAMERA TẤT CẢ
-// =========================
-
-$("cameraOffAll").onclick =
-  () => {
-
-    socket.emit(
-      "host-camera-off-all"
-    );
-
-  };
-
-
-// =========================
-// HOST: MỞ MIC
-// =========================
-
-$("unlockAllMic").onclick =
-  () => {
-
-    socket.emit(
-      "host-unlock-all-mic"
-    );
-
-  };
-
-
-// =========================
-// HOST: MỞ CAMERA
-// =========================
-
-$("unlockAllCamera").onclick =
-  () => {
-
-    socket.emit(
-      "host-unlock-all-camera"
-    );
-
-  };
-
-
-// =========================
-// HOST: KHÓA PHÒNG
-// =========================
-
-$("lockRoom").onclick =
-  () => {
-
-    socket.emit(
-      "host-toggle-lock"
-    );
-
-  };
-
-
-// =========================
-// BỊ TẮT MIC
-// =========================
-
-socket.on(
-  "force-mute",
-  ({ locked }) => {
-
-    const track =
-      stream?.getAudioTracks()[0];
-
-
-    if (!track)
-      return;
-
-
-    track.enabled =
-      false;
-
-
-    $("mic").textContent =
-      locked
-        ? "🔒 Mic bị khóa"
-        : "🔇 Mic tắt";
-
-  }
-);
-
-
-// =========================
-// MỞ KHÓA MIC
-// =========================
-
-socket.on(
-  "unlock-mic",
-  () => {
-
-    $("mic").textContent =
-      "🎤 Mic";
-
-  }
-);
-
-
-// =========================
-// BỊ TẮT CAMERA
-// =========================
-
-socket.on(
-  "force-camera-off",
-  ({ locked }) => {
-
-    const track =
-      stream?.getVideoTracks()[0];
-
-
-    if (!track)
-      return;
-
-
-    track.enabled =
-      false;
-
-
-    $("cam").textContent =
-      locked
-        ? "🔒 Camera bị khóa"
-        : "🚫 Camera tắt";
-
-  }
-);
-
-
-// =========================
-// MỞ KHÓA CAMERA
-// =========================
-
-socket.on(
-  "unlock-camera",
-  () => {
-
-    $("cam").textContent =
-      "📷 Camera";
-
-  }
-);
-
-
-// =========================
-// BỊ ĐUỔI
-// =========================
-
-socket.on(
-  "removed-from-room",
-  () => {
-
-    if (stream) {
-
-      stream
-        .getTracks()
-        .forEach(
-          track => track.stop()
-        );
-
-    }
-
-
-    alert(
-      "Bạn đã được chủ phòng mời ra."
-    );
-
-
-    location.href =
-      location.pathname;
-
-  }
-);
-
-
-// =========================
-// KHÓA PHÒNG
-// =========================
-
-socket.on(
-  "room-lock-changed",
-  ({ locked }) => {
-
-    $("lockRoom").textContent =
-      locked
-        ? "🔓 Mở khóa phòng"
-        : "🔒 Khóa phòng";
-
-
-    toast(
-      locked
-        ? "Đã khóa phòng."
-        : "Đã mở khóa phòng."
-    );
-
-  }
-);
-
-
-// =========================
-// PHÒNG ĐÓNG
-// =========================
-
-socket.on(
-  "room-closed",
-  () => {
-
-    alert(
-      "Chủ phòng đã đóng cuộc họp."
-    );
-
-
-    location.href =
-      location.pathname;
-
-  }
-);
-
-
-// =========================
-// CHAT
-// =========================
-
-$("chatBtn").onclick =
-  () => {
-
-    show(
-      $("chatPanel")
-    );
-
-  };
-
-
-$("closeChat").onclick =
-  () => {
-
-    hide(
-      $("chatPanel")
-    );
-
-  };
-
-
-$("chatForm").onsubmit =
-  event => {
-
-    event.preventDefault();
-
-
-    const input =
-      $("chatInput");
-
-
-    const text =
-      input.value.trim();
-
-
-    if (!text)
-      return;
-
-
-    socket.emit(
-      "chat",
-      {
-        text
-      }
-    );
-
-
-    input.value =
-      "";
-
-  };
-
-
-socket.on(
-  "chat",
-  message => {
-
-    const div =
-      document.createElement(
-        "div"
-      );
-
-    div.className =
-      "msg";
-
-
-    const nameEl =
-      document.createElement(
-        "b"
-      );
-
-    nameEl.textContent =
-      message.name +
-      ": ";
-
-
-    const textEl =
-      document.createElement(
-        "span"
-      );
-
-    textEl.textContent =
-      message.text;
-
-
-    div.appendChild(
-      nameEl
-    );
-
-    div.appendChild(
-      textEl
-    );
-
-
-    $("messages")
-      .appendChild(div);
-
-
-    $("messages").scrollTop =
-      $("messages").scrollHeight;
-
-  }
-);
-
-
-// =========================
-// PHÒNG LỖI
-// =========================
-
-socket.on(
-  "room-error",
-  ({ message }) => {
-
-    alert(message);
-
-  }
-);
-
-
-socket.on(
-  "room-locked",
-  ({ message }) => {
-
-    alert(message);
-
-  }
-);
-
-
-// =========================
-// TOAST
-// =========================
-
-function toast(
-  message
-) {
-
-  const el =
-    $("toast");
-
-
-  el.textContent =
-    message;
-
-
-  show(el);
-
-
-  setTimeout(
-    () => {
-
-      hide(el);
-
-    },
-    2500
-  );
-
-}
-
-
-// =========================
-// SHOW / HIDE
-// =========================
-
-function show(
-  element
-) {
-
-  element.classList.remove(
-    "hidden"
-  );
-
-}
-
-
-function hide(
-  element
-) {
-
-  element.classList.add(
-    "hidden"
-  );
-
-}
+</html>
